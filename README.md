@@ -4,9 +4,11 @@ A talking game for kids in Hebrew, played on a phone:
 
 - **Dictation (הכתבה)**: the app reads 15 words, the child writes them in a notebook,
   then you check them together in the app.
+- **Spelling (איות)**: the app says a week word and the child spells it out loud by letter
+  name ("דלת, גימל"), or taps the letters on screen.
 - **Guess the animal**: listen to clues and say (or tap) the answer.
 
-Kids tap the red mic and speak Hebrew: "הכתבה", "חיות", "שוב", "לאט",
+Kids tap the red mic and speak Hebrew: "הכתבה", "איות", "חיות", "שוב", "לאט",
 "הבאה", "רמז" or "הביתה".
 
 ## Changing the app

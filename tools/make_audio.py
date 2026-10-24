@@ -58,9 +58,9 @@ def app_phrases(path="app.html"):
     with open(path, encoding="utf-8") as f:
         src = f.read()
     block = src.split("/* speech:start", 1)[1].split("*/", 1)[1].split("/* speech:end */", 1)[0]
-    js = block + "\nconsole.log(JSON.stringify({ P, NUMS, PRAISE, ANIMALS }));"
+    js = block + "\nconsole.log(JSON.stringify({ P, NUMS, PRAISE, ANIMALS, LETTER_NAMES }));"
     data = json.loads(subprocess.run(["node", "-e", js], capture_output=True, text=True, check=True).stdout)
-    texts = list(data["P"].values()) + data["NUMS"] + data["PRAISE"]
+    texts = list(data["P"].values()) + data["NUMS"] + data["PRAISE"] + list(data["LETTER_NAMES"].values())
     for animal in data["ANIMALS"]:
         texts += [animal["name"], *animal["clues"]]
     return [(t.strip(), RATE, t.strip()) for t in texts if t.strip()]

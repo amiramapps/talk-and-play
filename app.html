@@ -14,6 +14,7 @@
   --sea: #0E8F86;
   --berry: #D7385F;
   --line: #EADFC6;
+  --sky: #2F6FD0;
   --on-accent: #FFFFFF;
   --display: "Fredoka", "Varela Round", "Arial Hebrew", system-ui, sans-serif;
   --body: "Varela Round", "Arial Hebrew", "Trebuchet MS", system-ui, sans-serif;
@@ -22,13 +23,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #14203A; --card: #1D2B4C; --ink: #F4F1FF; --muted: #A9B4D6;
-    --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68;
+    --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68; --sky: #7DB1FF;
     --on-accent: #10192E; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #14203A; --card: #1D2B4C; --ink: #F4F1FF; --muted: #A9B4D6;
-  --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68;
+  --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68; --sky: #7DB1FF;
   --on-accent: #10192E; color-scheme: dark;
 }
 
@@ -140,6 +141,27 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .mark.on.no { background: var(--berry); border-color: var(--berry); color: var(--on-accent); }
 .score { font-family: var(--display); font-weight: 700; font-size: 1.3rem; text-align: center; margin: 0; font-variant-numeric: tabular-nums; }
 
+/* Spelling */
+.tile.spell { background: var(--sky); color: var(--on-accent); }
+.spell-speaker { align-self: center; width: 120px; height: 120px; font-size: 3.2rem; }
+.spell-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 64px; }
+.spell-tiles span {
+  width: 52px; height: 60px; border-radius: 14px; border: 2px dashed var(--line); background: var(--paper);
+  display: grid; place-items: center; font-family: var(--letters); font-weight: 500; font-size: 2rem; line-height: 1;
+}
+.spell-tiles span.filled { border-style: solid; border-color: var(--muted); }
+.spell-tiles span.ok { border-style: solid; border-color: var(--sea); background: color-mix(in srgb, var(--sea) 18%, var(--paper)); }
+.spell-tiles span.miss { border-style: solid; border-color: var(--berry); background: color-mix(in srgb, var(--berry) 18%, var(--paper)); }
+.spell-tiles span.reveal { border-style: solid; border-color: var(--sun); background: color-mix(in srgb, var(--sun) 28%, var(--paper)); }
+.pad { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.pad button {
+  min-height: 46px; border-radius: 10px; border: 2px solid var(--line); background: var(--paper); padding: 0;
+  font-family: var(--letters); font-weight: 500; font-size: 1.35rem;
+}
+.pad button:active { background: var(--sun); color: #2A1E00; }
+.result { font-weight: 700; }
+.result.yes { color: var(--sea); } .result.no { color: var(--berry); }
+
 /* Animal game */
 .mystery {
   align-self: center; width: 150px; height: 150px; border-radius: 50%;
@@ -190,6 +212,10 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
           <span class="pic">📝</span>
           <span><strong>הכתבה</strong><span id="dictTileInfo">אומרים: ״הכתבה״</span></span>
         </button>
+        <button class="tile spell" id="goSpell">
+          <span class="pic">🗣️</span>
+          <span><strong>איות</strong><span>אומרים: ״איות״</span></span>
+        </button>
         <button class="tile guess" id="goGuess">
           <span class="pic">🦁</span>
           <span><strong>מנחשים חיות</strong><span>אומרים: ״חיות״</span></span>
@@ -198,7 +224,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       <ul class="say-list">
         <li class="label">מה אפשר להגיד</li>
         <li><b>״שוב״</b> או <b>״לאט״</b> לשמוע את המילה שוב</li>
-        <li><b>״הבא״</b> להמשיך למילה הבאה</li>
+        <li>באיות אומרים את שמות האותיות: <b>״דלת, גימל״</b></li>
         <li><b>״רמז״</b> לשמוע עוד רמז על החיה</li>
         <li><b>״הביתה״</b> לחזור לכאן</li>
       </ul>
@@ -251,6 +277,50 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       </div>
     </section>
 
+    <!-- Spelling: get ready -->
+    <section class="screen" id="spellIntro" hidden>
+      <div class="card">
+        <h2 id="spellTitle">איות</h2>
+        <ul class="facts" id="spellFacts"></ul>
+        <p class="feedback" id="spellIntroFb"></p>
+        <div class="row">
+          <button class="btn main" id="startSpellBtn">מתחילים!</button>
+          <button class="btn" id="restartSpellBtn" hidden>מתחילים מחדש</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spelling: one word at a time -->
+    <section class="screen" id="spellWord" hidden>
+      <div class="card">
+        <div class="progress"><span>מילה</span><span class="num" id="spellNum">1 / 15</span></div>
+        <div class="bar"><i id="spellBar" style="width:0%"></i></div>
+        <button class="speaker spell-speaker" id="spellSpeaker" aria-label="לשמוע את המילה שוב">🔊</button>
+        <p class="hint">אומרים את האותיות, אחת אחרי השנייה.</p>
+        <div class="spell-tiles" id="spellTiles" aria-live="polite"></div>
+        <p class="feedback" id="spellFb"></p>
+        <div class="pad" id="pad" hidden></div>
+        <div class="row">
+          <button class="btn" id="backBtn">⌫ מחיקה</button>
+          <button class="btn" id="padBtn">⌨️ לוח אותיות</button>
+          <button class="btn main" id="spellNextBtn">דלג ←</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spelling: results -->
+    <section class="screen" id="spellDone" hidden>
+      <div class="card">
+        <h2>סיימנו את האיות!</h2>
+        <ol class="checklist" id="spellResults"></ol>
+        <p class="score" id="spellScore"></p>
+        <div class="row">
+          <button class="btn main" id="spellAgainBtn">עוד סיבוב</button>
+          <button class="btn" id="spellHomeBtn">למסך הראשי</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Animals -->
     <section class="screen" id="guess" hidden>
       <div class="card">
@@ -286,7 +356,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   /* speech:start  tools/make_audio.py records every phrase between these markers with a natural Hebrew voice */
   const P = {
     tapButtons: "לוחצים על הכפתורים הגדולים כדי לשחק!",
-    canSayGames: "אפשר להגיד: הכתבה, או חיות.",
+    canSayGames: "אפשר להגיד: הכתבה, איות, או חיות.",
     whatToPlay: "במה נשחק?",
     sayStart: "כשמוכנים עם מחברת ועיפרון, אומרים: מתחילים.",
     dictCommands: "אפשר להגיד: שוב, לאט, רגע, או הבאה.",
@@ -311,7 +381,24 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     lastClue: "זה היה הרמז האחרון. מי אני?",
     lookAtPictures: "לא בדיוק! מסתכלים על התמונות. מי אני?",
     iWas: "הייתי",
-    tryAnother: "בואו ננסה עוד אחת."
+    tryAnother: "בואו ננסה עוד אחת.",
+    spellIntro: "איות! שומעים מילה, ואומרים את האותיות שלה, אחת אחרי השנייה. לוחצים מתחילים.",
+    spellSayStart: "כשמוכנים, אומרים: מתחילים.",
+    spellResume: "ממשיכים את האיות מאיפה שעצרנו?",
+    howSpell: "איך מאייתים:",
+    spelledRight: "נכון! איות מושלם!",
+    spellTryAgain: "לא בדיוק. מנסים שוב, מההתחלה.",
+    thisIsHow: "ככה מאייתים את המילה:",
+    sayLettersHint: "אומרים את שמות האותיות, אחת אחרי השנייה. למשל: דָּלֶת, גִּימֶל.",
+    cleared: "מחקנו. מתחילים מההתחלה.",
+    spellDone: "סיימנו את האיות!"
+  };
+  // How each letter's name is said
+  const LETTER_NAMES = {
+    "א":"אָלֶף","ב":"בֵּית","ג":"גִּימֶל","ד":"דָּלֶת","ה":"הֵא","ו":"וָו","ז":"זַיִן","ח":"חֵית",
+    "ט":"טֵית","י":"יוּד","כ":"כַּף","ך":"כַּף סוֹפִית","ל":"לָמֶד","מ":"מֵם","ם":"מֵם סוֹפִית",
+    "נ":"נוּן","ן":"נוּן סוֹפִית","ס":"סָמֶךְ","ע":"עַיִן","פ":"פֵּא","ף":"פֵּא סוֹפִית","צ":"צָדִי",
+    "ץ":"צָדִי סוֹפִית","ק":"קוֹף","ר":"רֵישׁ","ש":"שִׁין","ת":"תָּו"
   };
   // Numbers as said about words (feminine): NUMS[13] is "thirteen"
   const NUMS = ["אֶפֶס","אַחַת","שְׁתַּיִם","שָׁלוֹשׁ","אַרְבַּע","חָמֵשׁ","שֵׁשׁ","שֶׁבַע","שְׁמוֹנֶה","תֵּשַׁע","עֶשֶׂר",
@@ -481,13 +568,11 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       hush();
       rec = new SR();
       rec.lang = LANG; rec.interimResults = false; rec.maxAlternatives = 5;
-      let got = false;
-      rec.onresult = e => {
-        got = true;
-        resolve(Array.from(e.results[0]).map(a => clean(a.transcript)).filter(Boolean));
-      };
-      rec.onerror = e => { if (!got) reject(e.error); };
-      rec.onend = () => { setListening(false); if (!got) resolve([]); };
+      // Hand back the result once the mic has closed, so the app can listen again right away
+      let heard = null, error = null;
+      rec.onresult = e => { heard = Array.from(e.results[0]).map(a => clean(a.transcript)).filter(Boolean); };
+      rec.onerror = e => { error = e.error; };
+      rec.onend = () => { setListening(false); if (!heard && error && error !== "aborted") reject(error); else resolve(heard || []); };
       setListening(true);
       try { rec.start(); } catch (err) { setListening(false); reject("not-allowed"); }
     });
@@ -498,16 +583,23 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     if (on) setStatus("מקשיבים…");
   }
 
-  mic.addEventListener("click", async () => {
+  mic.addEventListener("click", () => {
     if (voiceBlocked) { say(P.tapButtons); return; }
     if (listening) { rec && rec.stop(); return; }
+    listenOnce(false);
+  });
+
+  // auto: the app started listening by itself; if the phone refuses, the child just taps the mic
+  async function listenOnce(auto) {
+    if (voiceBlocked || listening) return;
     try {
       const heard = await listen();
-      if (!heard.length) { setStatus("לא שמעתי כלום. לוחצים ומנסים שוב!"); return; }
+      if (!heard.length) { setStatus(auto ? "לוחצים על המיקרופון ומדברים" : "לא שמעתי כלום. לוחצים ומנסים שוב!"); return; }
       setStatus("שמעתי: ״" + heard[0] + "״");
       handle(heard);
     } catch (err) {
-      if (err === "not-allowed" || err === "service-not-allowed" || err === "audio-capture") {
+      if (auto) setStatus("לוחצים על המיקרופון ומדברים");
+      else if (err === "not-allowed" || err === "service-not-allowed" || err === "audio-capture") {
         markNoVoice("המיקרופון כבוי כאן. לוחצים על הכפתורים, או פותחים את האפליקציה בדף משלה.");
       } else if (err === "no-speech") {
         setStatus("לא שמעתי כלום. לוחצים ומנסים שוב!");
@@ -517,12 +609,13 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
         setStatus("אופס, לא הצלחתי להקשיב. לוחצים על המיקרופון ומנסים שוב.");
       }
     }
-  });
+  }
 
   // ---------- Commands ----------
   const HOME = ["הביתה","תפריט","מסך ראשי","להתחלה"];
   const WANT_GUESS = ["חיה","חיות","לנחש","ניחוש","חידה","חידות"];
   const WANT_DICT = ["הכתבה","הכתבות","מילים","כתיבה","לכתוב"];
+  const WANT_SPELL = ["איות","לאיית","מאייתים","אותיות"];
   const AGAIN = ["שוב","עוד פעם","חזור","תחזור","תחזרי","לא שמעתי","מה אמרת"];
   const SLOW = ["לאט","יותר לאט"];
   const NEXT = ["הבא","הבאה","כתבתי","דלג"];
@@ -533,6 +626,8 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 
   function handle(alts) {
     if (saysPhrase(alts, HOME)) { goHome(); return; }
+    if (current === "spellWord") return handleSpell(alts);
+    if (!current.startsWith("spell") && saysPhrase(alts, WANT_SPELL)) { openSpelling(); return; }
     if (!current.startsWith("dict") && saysPhrase(alts, WANT_DICT)) { openDictation(); return; }
     if (current !== "guess" && saysPhrase(alts, WANT_GUESS)) { startGuess(); return; }
     if (current === "dictIntro") {
@@ -549,15 +644,20 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       return say(P.dictCommands);
     }
     if (current === "dictCheck") return say(P.checkWithParent);
+    if (current === "spellIntro") {
+      if (saysPhrase(alts, START)) return startSpelling(false);
+      return say(P.spellSayStart);
+    }
     if (current === "guess") return handleGuess(alts);
     say(P.canSayGames);
   }
 
   // ---------- Screens ----------
-  const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "guess"];
+  const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "spellIntro", "spellWord", "spellDone", "guess"];
   function show(id) {
     current = id;
     if (id !== "dictWord") { stopTimer(); letScreenSleep(); }
+    if (id !== "spellWord") { clearTimeout(advanceTimer); if (listening && rec) rec.abort(); }
     for (const s of SCREENS) $(s).hidden = s !== id;
     document.querySelector("main").scrollTop = 0;
   }
@@ -568,6 +668,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   }
   $("homeBtn").onclick = goHome;
   $("goDict").onclick = () => openDictation();
+  $("goSpell").onclick = () => openSpelling();
   $("goGuess").onclick = () => startGuess();
 
   // ---------- Weekly word lists (words.txt) ----------
@@ -855,6 +956,249 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   function setFb(id, text, kind) {
     const el = $(id); el.textContent = text; el.className = "feedback" + (kind ? " " + kind : "");
   }
+
+  // ---------- Spelling (איות) ----------
+  // The child hears a week word and says its letters by name; each recognized letter fills a box.
+  // Letter names the way speech recognition tends to write them
+  const NAME_TO_LETTER = {};
+  for (const [letter, names] of Object.entries({
+    "א": ["אלף","אלפ","אלאף"], "ב": ["בית","ביית","בת"], "ג": ["גימל","גמל","גימעל"],
+    "ד": ["דלת","דלט","דאלת"], "ה": ["הא","הה","האא"], "ו": ["וו","ואו","וואו","ואב","וב"],
+    "ז": ["זין","זיין","זאין"], "ח": ["חית","חת","חיט"], "ט": ["טית","טת","טיט"],
+    "י": ["יוד","יוט","יאוד","יודה"], "כ": ["כף","כאף","כפ"], "ל": ["למד","לאמד","למת","לאמת"],
+    "מ": ["מם","מים","מאם"], "נ": ["נון","נונ","נן"], "ס": ["סמך","סמח","סמכ","סאמך"],
+    "ע": ["עין","עיין","עאין"], "פ": ["פא","פה","פי"], "צ": ["צדי","צדיק","צאדי","צדיי"],
+    "ק": ["קוף","קופ","כוף"], "ר": ["ריש","רייש","רש"], "ש": ["שין","שיין","שן","סין"],
+    "ת": ["תו","תאו","תיו","תאב","טאו"]
+  })) for (const n of names) NAME_TO_LETTER[n] = letter;
+  const TO_FINAL = { "כ": "ך", "מ": "ם", "נ": "ן", "פ": "ף", "צ": "ץ" };
+  const FROM_FINAL = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" };
+  // Final letters count as their regular form when checking, since "מם" and "מם סופית" sound alike to the mic
+  const baseLetters = s => [...s].map(c => FROM_FINAL[c] || c).join("");
+  const isLetter = c => /^[א-ת]$/.test(c);
+  const targetOf = w => [...w.written.replace(/\s+/g, "")];
+
+  function parseLetters(text) {
+    const out = [];
+    for (const tok of text.split(" ")) {
+      if (/^סופי(ת|ות)?$/.test(tok)) {
+        const last = out[out.length - 1];
+        if (TO_FINAL[last]) out[out.length - 1] = TO_FINAL[last];
+      } else if (NAME_TO_LETTER[tok]) out.push(NAME_TO_LETTER[tok]);
+      else if (tok.length === 1 && isLetter(tok)) out.push(tok);
+    }
+    return out;
+  }
+  // Of the recognizer's guesses, take the one that continues the word correctly the furthest
+  function bestLetters(alts) {
+    const target = baseLetters(targetOf(spell.words[spell.at]).join(""));
+    let best = [], bestScore = -1;
+    for (const a of alts) {
+      const ls = parseLetters(a);
+      if (!ls.length) continue;
+      const next = baseLetters(attempt.join("") + ls.join(""));
+      let score = 0;
+      while (score < next.length && next[score] === target[score]) score++;
+      if (score > bestScore) { bestScore = score; best = ls; }
+    }
+    return best;
+  }
+
+  let spell = null, spellWeek = null, attempt = [], tries = 0, spellLocked = false, advanceTimer = null;
+
+  async function openSpelling() {
+    hush(); show("spellIntro");
+    $("spellFacts").innerHTML = ""; setFb("spellIntroFb", "טוענים את המילים…");
+    $("startSpellBtn").disabled = true; $("restartSpellBtn").hidden = true;
+    await weeksReady;
+    if (current !== "spellIntro") return;
+    spellWeek = currentWeek();
+    if (!spellWeek) {
+      $("spellTitle").textContent = "איות · שבוע " + thisWeek;
+      setFb("spellIntroFb", "עוד אין מילים לשבוע " + thisWeek + ". אמא או אבא מוסיפים אותן בקובץ words.txt.", "try");
+      return say(P.noWords);
+    }
+    const reviewAvail = Math.min(REVIEW_COUNT, reviewPool(spellWeek).length);
+    $("spellTitle").textContent = "איות · " + spellWeek.label;
+    const facts = [
+      (spellWeek.words.length + reviewAvail) + " מילים: " + spellWeek.words.length + " חדשות" + (reviewAvail ? " ו-" + reviewAvail + " לחזרה" : ""),
+      "שומעים מילה, ואומרים את האותיות שלה אחת אחרי השנייה",
+      "למשל: דג ← ״דלת, גימל״",
+      voiceBlocked ? "המיקרופון לא זמין כאן, אז לוחצים על האותיות במסך" : "אפשר גם ללחוץ על האותיות במסך"
+    ];
+    if (spellWeek.num !== thisWeek) facts.unshift("עוד אין מילים לשבוע " + thisWeek + ", אז עושים את " + spellWeek.label);
+    for (const t of facts) { const li = document.createElement("li"); li.textContent = t; $("spellFacts").appendChild(li); }
+    setFb("spellIntroFb", "");
+    const saved = load("tp-spell", null);
+    const resumable = saved && saved.key === buildKey(spellWeek) && saved.stage !== "done";
+    $("startSpellBtn").disabled = false;
+    if (resumable) {
+      spell = saved;
+      $("startSpellBtn").textContent = "ממשיכים ממילה " + (saved.at + 1);
+      $("restartSpellBtn").hidden = false;
+      say(P.spellResume);
+    } else {
+      spell = null;
+      $("startSpellBtn").textContent = "מתחילים!";
+      say(P.spellIntro);
+    }
+  }
+
+  function startSpelling(fromScratch) {
+    if (!spellWeek) return;
+    if (fromScratch || !spell) spell = buildDictation(spellWeek);
+    save("tp-spell", spell);
+    preload([P.howSpell, P.spelledRight, P.spellTryAgain, P.thisIsHow, ...Object.values(LETTER_NAMES), ...spell.words.flatMap(w => [w.spoken, w.sentence])]);
+    showSpellWord();
+  }
+  $("startSpellBtn").onclick = () => startSpelling(false);
+  $("restartSpellBtn").onclick = () => startSpelling(true);
+
+  function showSpellWord() {
+    show("spellWord");
+    const n = spell.words.length;
+    attempt = []; tries = 0; spellLocked = false;
+    $("spellNum").textContent = (spell.at + 1) + " / " + n;
+    $("spellBar").style.width = (spell.at / n * 100) + "%";
+    $("spellNextBtn").textContent = "דלג ←";
+    if (voiceBlocked) $("pad").hidden = false;
+    setFb("spellFb", "");
+    renderAttempt();
+    if (!voiceBlocked) setStatus("אומרים את האותיות, אחת אחרי השנייה");
+    promptWord();
+  }
+
+  function promptWord() {
+    const w = spell.words[spell.at];
+    say([P.howSpell, w.spoken, w.sentence]).then(done => { if (done) autoListen(); });
+  }
+  function autoListen() {
+    if (current === "spellWord" && !spellLocked && !voiceBlocked) listenOnce(true);
+  }
+
+  // Boxes for the word's letters; marks colours each box ("ok", "miss" or "reveal")
+  function renderAttempt(marks) {
+    const target = targetOf(spell.words[spell.at]);
+    const box = $("spellTiles"); box.innerHTML = "";
+    for (let i = 0; i < Math.max(target.length, attempt.length); i++) {
+      const t = document.createElement("span");
+      t.textContent = attempt[i] || "";
+      if (attempt[i]) t.classList.add("filled");
+      if (marks && marks[i]) t.classList.add(marks[i]);
+      box.appendChild(t);
+    }
+  }
+
+  function addLetters(ls) {
+    if (spellLocked || !ls.length) return;
+    attempt.push(...ls);
+    renderAttempt();
+    if (attempt.length >= targetOf(spell.words[spell.at]).length) return checkAttempt();
+    setTimeout(autoListen, 150);
+  }
+
+  function checkAttempt() {
+    const w = spell.words[spell.at], target = targetOf(w);
+    spellLocked = true;
+    if (baseLetters(attempt.join("")) === baseLetters(target.join(""))) {
+      attempt = [...target]; // show the word with its real final letters
+      renderAttempt(target.map(() => "ok"));
+      spell.marks[spell.at] = tries === 0 ? "ok" : "ok2"; save("tp-spell", spell);
+      addStars(1);
+      setFb("spellFb", "נכון! " + w.written + " ⭐", "good");
+      $("spellNextBtn").textContent = "הבאה ←";
+      return say([P.spelledRight, pick(PRAISE)]).then(scheduleAdvance);
+    }
+    tries++;
+    renderAttempt(attempt.map((c, i) => baseLetters(c) === baseLetters(target[i] || "") ? "ok" : "miss"));
+    if (tries < 2) {
+      setFb("spellFb", "לא בדיוק. מנסים שוב!", "try");
+      return say(P.spellTryAgain).then(done => {
+        if (current !== "spellWord") return;
+        attempt = []; spellLocked = false; renderAttempt();
+        if (done) autoListen();
+      });
+    }
+    // Second miss: show and spell the word, then move on
+    spell.marks[spell.at] = "miss"; save("tp-spell", spell);
+    attempt = [...target];
+    renderAttempt(target.map(() => "reveal"));
+    setFb("spellFb", "ככה מאייתים: " + w.written, "try");
+    $("spellNextBtn").textContent = "הבאה ←";
+    say([P.thisIsHow, ...target.map(c => LETTER_NAMES[c] || c), w.spoken]).then(scheduleAdvance);
+  }
+
+  function scheduleAdvance(done) {
+    clearTimeout(advanceTimer);
+    if (done !== false) advanceTimer = setTimeout(() => { if (current === "spellWord") spellNext(); }, 1800);
+  }
+
+  function spellNext() {
+    clearTimeout(advanceTimer);
+    if (!(spell.at in spell.marks)) spell.marks[spell.at] = "miss"; // a skipped word comes back for review
+    if (spell.at + 1 >= spell.words.length) return finishSpelling();
+    spell.at++; save("tp-spell", spell);
+    showSpellWord();
+  }
+
+  function finishSpelling() {
+    spell.stage = "done"; save("tp-spell", spell);
+    const missed = new Set(load("tp-missed", []));
+    spell.words.forEach((w, i) => { if (spell.marks[i] === "ok") missed.delete(w.written); else if (spell.marks[i] === "miss") missed.add(w.written); });
+    save("tp-missed", [...missed]);
+    show("spellDone");
+    const list = $("spellResults"); list.innerHTML = "";
+    let right = 0;
+    spell.words.forEach((w, i) => {
+      const ok = spell.marks[i] === "ok" || spell.marks[i] === "ok2";
+      if (ok) right++;
+      const li = document.createElement("li"); li.className = ok ? "ok" : "miss";
+      const n = document.createElement("span"); n.className = "n"; n.textContent = i + 1;
+      const word = document.createElement("span"); word.className = "w"; word.textContent = w.written;
+      if (w.review) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "חזרה"; word.append(" ", t); }
+      const hear = document.createElement("button"); hear.className = "mini"; hear.textContent = "🔊"; hear.setAttribute("aria-label", "לשמוע את " + w.written);
+      hear.onclick = () => say(w.spoken);
+      const res = document.createElement("span"); res.className = "mini result " + (ok ? "yes" : "no"); res.textContent = ok ? "✓" : "✗";
+      res.setAttribute("aria-label", ok ? "נכון" : "טעות");
+      li.append(n, word, hear, res);
+      list.appendChild(li);
+    });
+    const total = spell.words.length, num = n => NUMS[n] || String(n);
+    $("spellScore").textContent = right + " נכונות מתוך " + total;
+    if (!voiceBlocked) setStatus("לוחצים על 🔊 כדי לשמוע מילה שוב");
+    say([P.spellDone, num(right), P.outOf, num(total), pick(PRAISE)]);
+  }
+
+  function handleSpell(alts) {
+    if (spellLocked) return;
+    const ls = bestLetters(alts);
+    if (ls.length) return addLetters(ls);
+    if (saysPhrase(alts, ["מחק", "מחיקה", "מההתחלה", "טעיתי"])) {
+      attempt = []; renderAttempt();
+      return say(P.cleared).then(done => { if (done) autoListen(); });
+    }
+    if (saysPhrase(alts, AGAIN)) return promptWord();
+    if (saysPhrase(alts, NEXT)) return spellNext();
+    if (saysPhrase(alts, ["סיימתי", "בדיקה", "תבדוק", "תבדקי"]) && attempt.length) return checkAttempt();
+    if (saysPhrase(alts, WANT_GUESS)) return startGuess();
+    if (saysPhrase(alts, ["הכתבה"])) return openDictation();
+    setFb("spellFb", "אומרים את שמות האותיות, למשל ״דלת, גימל״", "try");
+    say(P.sayLettersHint).then(done => { if (done) autoListen(); });
+  }
+
+  // On-screen letters, for when the mic mishears a letter or isn't available
+  for (const c of "אבגדהוזחטיכךלמםנןסעפףצץקרשת") {
+    const b = document.createElement("button");
+    b.textContent = c; b.setAttribute("aria-label", LETTER_NAMES[c] ? stripNiqqud(LETTER_NAMES[c]) : c);
+    b.onclick = () => { if (listening && rec) rec.abort(); addLetters([c]); };
+    $("pad").appendChild(b);
+  }
+  $("padBtn").onclick = () => { $("pad").hidden = !$("pad").hidden; };
+  $("backBtn").onclick = () => { if (!spellLocked && attempt.length) { attempt.pop(); renderAttempt(); } };
+  $("spellSpeaker").onclick = () => { if (!spellLocked) promptWord(); else say(spell.words[spell.at].spoken); };
+  $("spellNextBtn").onclick = spellNext;
+  $("spellAgainBtn").onclick = () => openSpelling();
+  $("spellHomeBtn").onclick = goHome;
 
   // ---------- Animal game ----------
   let animal = null, clueAt = 0, solved = false, lastAnimal = -1;
