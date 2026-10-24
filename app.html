@@ -14,7 +14,6 @@
   --sea: #0E8F86;
   --berry: #D7385F;
   --line: #EADFC6;
-  --guide: #CBD5EC;
   --on-accent: #FFFFFF;
   --display: "Fredoka", "Varela Round", "Arial Hebrew", system-ui, sans-serif;
   --body: "Varela Round", "Arial Hebrew", "Trebuchet MS", system-ui, sans-serif;
@@ -24,13 +23,13 @@
   :root:not([data-theme="light"]) {
     --paper: #14203A; --card: #1D2B4C; --ink: #F4F1FF; --muted: #A9B4D6;
     --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68;
-    --guide: #3A4D7C; --on-accent: #10192E; color-scheme: dark;
+    --on-accent: #10192E; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #14203A; --card: #1D2B4C; --ink: #F4F1FF; --muted: #A9B4D6;
   --sun: #FFC24D; --sea: #34C9BE; --berry: #FF6F91; --line: #2D3E68;
-  --guide: #3A4D7C; --on-accent: #10192E; color-scheme: dark;
+  --on-accent: #10192E; color-scheme: dark;
 }
 
 html, body { height: 100%; }
@@ -47,7 +46,8 @@ body {
   padding-block: 12px;
 }
 button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
+button:focus-visible, a:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
+a { color: var(--sea); }
 
 /* Header */
 .top { display: flex; align-items: center; gap: 12px; }
@@ -87,31 +87,51 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   background: var(--card); border: 2px dashed var(--line); border-radius: 18px; font-size: .95rem; }
 .say-list b { font-family: var(--display); font-weight: 600; }
 .label { font-size: .8rem; color: var(--muted); font-weight: 700; }
+.parents { font-size: .9rem; color: var(--muted); margin: 0; }
 
 .card { background: var(--card); border: 2px solid var(--line); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-/* Writing game */
-.word-head { display: flex; align-items: center; gap: 14px; }
-.word-pic { font-size: 3.2rem; line-height: 1; }
-.letters { display: flex; flex-wrap: wrap; gap: 6px; }
-.letters span {
-  font-family: var(--letters); font-weight: 500; font-size: 2rem; min-width: 44px; text-align: center;
-  padding: 0 6px; border-radius: 12px; background: var(--paper); border: 2px solid var(--line);
-  transition: transform .15s, background .15s;
-}
-.letters span.on { background: var(--sun); color: #2A1E00; border-color: var(--sun); transform: translateY(-4px) scale(1.1); }
-.trace { position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; max-height: 38vh;
-  border-radius: 18px; background: var(--paper); border: 2px solid var(--line); overflow: hidden; touch-action: none; }
-.trace canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.card h2 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; line-height: 1.2; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn {
   flex: 1 1 auto; min-height: 52px; border-radius: 16px; border: 2px solid var(--line);
   background: var(--card); font-family: var(--display); font-weight: 600; font-size: 1.1rem; padding: 6px 14px;
 }
 .btn.main { background: var(--sea); border-color: var(--sea); color: var(--on-accent); }
+.btn:disabled { opacity: .4; cursor: default; }
 .feedback { min-height: 1.45em; margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.15rem; text-align: center; }
 .feedback.good { color: var(--sea); }
 .feedback.try { color: var(--berry); }
+
+/* Dictation */
+.facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.progress { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--display); font-weight: 600; }
+.progress .num { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--sun); border-radius: inherit; transition: width .3s; }
+.speaker {
+  align-self: center; width: 150px; height: 150px; border-radius: 50%; border: 0;
+  background: var(--sun); color: #2A1E00; font-size: 4rem; line-height: 1;
+  display: grid; place-items: center; box-shadow: 0 6px 0 rgba(0,0,0,.14);
+}
+.speaker:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.14); }
+.speaker.talking { animation: pop .6s ease; }
+.hint { margin: 0; text-align: center; color: var(--muted); }
+.tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
+
+.checklist { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.checklist li {
+  display: grid; grid-template-columns: 2ch 1fr auto auto; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 14px; background: var(--paper); border: 2px solid var(--line);
+}
+.checklist li.ok { border-color: var(--sea); }
+.checklist li.miss { border-color: var(--berry); }
+.checklist .n { color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
+.checklist .w { font-family: var(--letters); font-weight: 500; font-size: 1.6rem; line-height: 1.2; min-width: 0; overflow-wrap: anywhere; }
+.mini { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); font-size: 1.1rem; display: grid; place-items: center; }
+.marks { display: flex; gap: 6px; }
+.mark.on.yes { background: var(--sea); border-color: var(--sea); color: var(--on-accent); }
+.mark.on.no { background: var(--berry); border-color: var(--berry); color: var(--on-accent); }
+.score { font-family: var(--display); font-weight: 700; font-size: 1.3rem; text-align: center; margin: 0; font-variant-numeric: tabular-nums; }
 
 /* Animal game */
 .mystery {
@@ -159,9 +179,9 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       <p class="hello">שלום! במה נשחק?</p>
       <p class="sub">לוחצים על משחק, או לוחצים על המיקרופון האדום ואומרים את השם שלו.</p>
       <div class="tiles">
-        <button class="tile write" id="goWrite">
-          <span class="pic">✏️</span>
-          <span><strong>כותבים מילים</strong><span>אומרים: ״כתיבה״</span></span>
+        <button class="tile write" id="goDict">
+          <span class="pic">📝</span>
+          <span><strong>הכתבה</strong><span id="dictTileInfo">אומרים: ״הכתבה״</span></span>
         </button>
         <button class="tile guess" id="goGuess">
           <span class="pic">🦁</span>
@@ -170,33 +190,53 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       </div>
       <ul class="say-list">
         <li class="label">מה אפשר להגיד</li>
-        <li><b>״איך כותבים כלב?״</b> ללמוד לכתוב כל מילה</li>
-        <li><b>״שוב״</b> או <b>״הבא״</b> לשמוע שוב או להמשיך</li>
+        <li><b>״שוב״</b> או <b>״לאט״</b> לשמוע את המילה שוב</li>
+        <li><b>״הבא״</b> להמשיך למילה הבאה</li>
         <li><b>״רמז״</b> לשמוע עוד רמז על החיה</li>
         <li><b>״הביתה״</b> לחזור לכאן</li>
       </ul>
+      <p class="parents">להורים: <a href="https://github.com/amiramapps/talk-and-play/edit/main/words.txt" target="_blank" rel="noopener">מוסיפים את המילים של השבוע</a> בקובץ words.txt.</p>
     </section>
 
-    <!-- Writing -->
-    <section class="screen" id="write" hidden>
+    <!-- Dictation: get ready -->
+    <section class="screen" id="dictIntro" hidden>
       <div class="card">
-        <div class="word-head">
-          <div class="word-pic" id="wordPic">🐱</div>
-          <div class="letters" id="letters" aria-live="polite"></div>
-        </div>
-        <div class="trace" id="trace">
-          <canvas id="guideCv"></canvas>
-          <canvas id="inkCv" aria-label="מעבירים את האצבע על האותיות"></canvas>
-        </div>
-        <p class="feedback" id="writeFb"></p>
+        <h2 id="weekTitle">הכתבה</h2>
+        <ul class="facts" id="dictFacts"></ul>
+        <p class="feedback" id="introFb"></p>
         <div class="row">
-          <button class="btn" id="spellBtn">🔊 איות</button>
-          <button class="btn" id="clearBtn">🧽 מחיקה</button>
+          <button class="btn main" id="startDictBtn">מתחילים!</button>
+          <button class="btn" id="restartDictBtn" hidden>מתחילים מחדש</button>
         </div>
+      </div>
+    </section>
+
+    <!-- Dictation: one word at a time -->
+    <section class="screen" id="dictWord" hidden>
+      <div class="card">
+        <div class="progress"><span>מילה</span><span class="num" id="wordNum">1 / 15</span></div>
+        <div class="bar"><i id="barFill" style="width:0%"></i></div>
+        <button class="speaker" id="speakerBtn" aria-label="לשמוע את המילה שוב">🔊</button>
+        <p class="hint">כותבים את המילה במחברת, ואז לוחצים ״הבאה״.</p>
         <div class="row">
-          <button class="btn main" id="doneBtn">סיימתי!</button>
-          <button class="btn" id="nextWordBtn">מילה הבאה ←</button>
+          <button class="btn" id="slowBtn">🐢 לאט</button>
+          <button class="btn" id="prevBtn">→ הקודמת</button>
+          <button class="btn main" id="nextBtn">הבאה ←</button>
         </div>
+      </div>
+    </section>
+
+    <!-- Dictation: check together -->
+    <section class="screen" id="dictCheck" hidden>
+      <div class="card">
+        <h2>בודקים יחד</h2>
+        <p class="sub">משווים כל מילה למחברת ומסמנים ✓ או ✗.</p>
+        <ol class="checklist" id="checklist"></ol>
+        <p class="score" id="score"></p>
+        <div class="row">
+          <button class="btn main" id="finishCheckBtn">סיימנו לבדוק</button>
+        </div>
+        <p class="feedback" id="checkFb"></p>
       </div>
     </section>
 
@@ -230,23 +270,8 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   const $ = id => document.getElementById(id);
   let current = "home";
   const LANG = "he-IL";
+  const REVIEW_COUNT = 5;
 
-  // ---------- Content ----------
-  // [word as written, word with niqqud for the voice, picture]
-  const WORDS = [
-    ["חתול","חָתוּל","🐱"],["כלב","כֶּלֶב","🐶"],["שמש","שֶׁמֶשׁ","☀️"],["דג","דָּג","🐟"],
-    ["כוכב","כּוֹכָב","⭐"],["עץ","עֵץ","🌳"],["כדור","כַּדּוּר","⚽"],["ירח","יָרֵחַ","🌙"],
-    ["ספר","סֵפֶר","📖"],["עוגה","עוּגָה","🎂"],["תפוח","תַּפּוּחַ","🍎"],["אמא","אִמָּא","👩"],
-    ["אבא","אַבָּא","👨"],["לב","לֵב","❤️"],["בית","בַּיִת","🏠"],["פרח","פֶּרַח","🌸"],
-    ["ים","יָם","🌊"],["גשם","גֶּשֶׁם","🌧️"],["בננה","בָּנָנָה","🍌"],["גלידה","גְּלִידָה","🍦"]
-  ];
-  // How the voice says each letter's name
-  const LETTER_NAMES = {
-    "א":"אָלֶף","ב":"בֵּית","ג":"גִּימֶל","ד":"דָּלֶת","ה":"הֵא","ו":"וָו","ז":"זַיִן","ח":"חֵית",
-    "ט":"טֵית","י":"יוּד","כ":"כַּף","ך":"כַּף סוֹפִית","ל":"לָמֶד","מ":"מֵם","ם":"מֵם סוֹפִית",
-    "נ":"נוּן","ן":"נוּן סוֹפִית","ס":"סָמֶךְ","ע":"עַיִן","פ":"פֵּא","ף":"פֵּא סוֹפִית","צ":"צָדִי",
-    "ץ":"צָדִי סוֹפִית","ק":"קוֹף","ר":"רֵישׁ","ש":"שִׁין","ת":"תָּו"
-  };
   // alt: the words that count as a right answer (written without niqqud or apostrophes)
   const ANIMALS = [
     { name: "אריה", e: "🦁", alt: ["אריה","אריות","לביא"], clues: ["אני חתול גדול עם רעמה מפוארת.", "קוראים לי מלך החיות.", "אני שואג: גררררר!"] },
@@ -270,6 +295,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
 
   // Hebrew text helpers: drop niqqud, apostrophes and punctuation so speech results compare cleanly
+  const stripNiqqud = t => t.replace(/[֑-ׇ]/g, "");
   const clean = t => t.replace(/[֑-ׇ'"׳״`]/g, "").replace(/[.,!?;:־-]/g, " ").replace(/\s+/g, " ").trim();
   // A spoken word matches a name with or without a one-letter prefix (הכלב, וכלב, זה כלב)
   const PREFIXES = "הובלכמש";
@@ -277,13 +303,16 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   const saidAny = (alts, names) => alts.some(a => a.split(" ").some(w => names.some(n => wordMatches(w, n))));
   const saysPhrase = (alts, phrases) => alts.some(a => phrases.some(p => a.includes(p)));
 
+  // ---------- Saved on this phone ----------
+  const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
   // ---------- Stars ----------
-  let stars = 0;
-  try { stars = parseInt(localStorage.getItem("tp-stars"), 10) || 0; } catch (e) {}
+  let stars = load("tp-stars", 0) || 0;
   const renderStars = () => { $("stars").textContent = "⭐ " + stars; };
-  function addStar() {
-    stars++;
-    try { localStorage.setItem("tp-stars", String(stars)); } catch (e) {}
+  function addStars(n = 1) {
+    stars += n;
+    save("tp-stars", stars);
     renderStars();
     const el = $("stars"); el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
   }
@@ -319,10 +348,11 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       const finish = () => { if (!done) { done = true; resolve(token === speakToken); } };
       u.onend = finish; u.onerror = finish;
       speechSynthesis.speak(u);
-      setTimeout(finish, 1500 + text.length * 120); // some phones never fire onend
+      setTimeout(finish, 1500 + text.length * 120 / rate); // some phones never fire onend
     });
   }
   const hush = () => { speakToken++; if (canSpeak) speechSynthesis.cancel(); };
+  const pause = ms => new Promise(r => setTimeout(r, ms));
 
   // ---------- Listening (speech to text) ----------
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -382,29 +412,41 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   });
 
   // ---------- Commands ----------
-  const SKIP_WORDS = new Set(["מילים","מילה","משהו","עוד","לי","אותי","את","אותה","אותו","זה"]);
   const HOME = ["הביתה","תפריט","מסך ראשי","להתחלה","עצור"];
   const WANT_GUESS = ["חיה","חיות","לנחש","ניחוש","חידה","חידות"];
-  const WANT_WRITE = ["כתיב","לכתוב","כותבים","מילים","מילה","אותיות","לאיית"];
+  const WANT_DICT = ["הכתבה","הכתבות","מילים","כתיבה","לכתוב"];
+  const AGAIN = ["שוב","עוד פעם","חזור","תחזור","תחזרי","לא שמעתי","מה אמרת"];
+  const SLOW = ["לאט","יותר לאט"];
+  const NEXT = ["הבא","הבאה","כתבתי","המשך","להמשיך","דלג"];
+  const PREV = ["הקודם","הקודמת","אחורה"];
+  const START = ["מתחילים","להתחיל","מוכן","מוכנה","מוכנים","יאללה","כן"];
 
   function handle(alts) {
-    // "איך כותבים כלב", "תלמד אותי לכתוב שמש", "לכתוב את המילה ים"
-    for (const a of alts) {
-      const m = a.match(/(?:לכתוב|כותבים|כותב|כותבת|לאיית|מאייתים)(?: את)?(?: המילה)? ([א-ת]+)/);
-      if (m && !SKIP_WORDS.has(m[1])) { startWrite(m[1]); return; }
-    }
     if (saysPhrase(alts, HOME)) { goHome(); return; }
+    if (!current.startsWith("dict") && saysPhrase(alts, WANT_DICT)) { openDictation(); return; }
     if (current !== "guess" && saysPhrase(alts, WANT_GUESS)) { startGuess(); return; }
-    if (current !== "write" && saysPhrase(alts, WANT_WRITE)) { startWrite(); return; }
-    if (current === "write") return handleWrite(alts);
+    if (current === "dictIntro") {
+      if (saysPhrase(alts, START)) return startDictation(false);
+      return say("כשמוכנים עם מחברת ועיפרון, אומרים: מתחילים.");
+    }
+    if (current === "dictWord") {
+      if (saysPhrase(alts, SLOW)) return readWord(0.6);
+      if (saysPhrase(alts, PREV)) return goWord(-1);
+      if (saysPhrase(alts, NEXT)) return goWord(1);
+      if (saysPhrase(alts, AGAIN)) return readWord();
+      return say("אפשר להגיד: שוב, לאט, או הבאה.");
+    }
+    if (current === "dictCheck") return say("עכשיו בודקים יחד עם אמא או אבא, ומסמנים וי או איקס.");
     if (current === "guess") return handleGuess(alts);
-    say("אפשר להגיד: כתיבה, או חיות.");
+    say("אפשר להגיד: הכתבה, או חיות.");
   }
 
   // ---------- Screens ----------
+  const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "guess"];
   function show(id) {
     current = id;
-    for (const s of ["home", "write", "guess"]) $(s).hidden = s !== id;
+    for (const s of SCREENS) $(s).hidden = s !== id;
+    document.querySelector("main").scrollTop = 0;
   }
   function goHome() {
     hush(); show("home");
@@ -412,141 +454,216 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     say("במה נשחק?");
   }
   $("homeBtn").onclick = goHome;
-  $("goWrite").onclick = () => startWrite();
+  $("goDict").onclick = () => openDictation();
   $("goGuess").onclick = () => startGuess();
 
-  // ---------- Writing game ----------
-  let word = "", spoken = "", wordIdx = -1, drawn = 0, earnedWord = false;
-  const guideCv = $("guideCv"), inkCv = $("inkCv"), trace = $("trace");
-  const gctx = guideCv.getContext("2d"), ictx = inkCv.getContext("2d");
-  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  // ---------- Weekly word lists (words.txt) ----------
+  // Format: a line starting with "שבוע" opens a week; then words, comma-separated or one per line,
+  // optionally "word | sentence". Lines starting with # are notes.
+  function parseWords(text) {
+    const weeks = [];
+    let week = null;
+    const add = (raw, sentence) => {
+      const spoken = raw.trim();
+      const written = stripNiqqud(spoken).trim();
+      if (!written) return;
+      if (!week) { week = { label: "שבוע 1", words: [] }; weeks.push(week); }
+      week.words.push({ written, spoken, sentence: (sentence || "").trim() });
+    };
+    for (let line of text.split(/\r?\n/)) {
+      line = line.trim();
+      if (!line || line.startsWith("#")) continue;
+      if (/^שבוע/.test(stripNiqqud(line))) { week = { label: line.replace(/[:\-–]+$/, "").trim(), words: [] }; weeks.push(week); continue; }
+      if (line.includes("|")) { const i = line.indexOf("|"); add(line.slice(0, i), line.slice(i + 1)); }
+      else line.split(/[,،]/).forEach(w => add(w));
+    }
+    return weeks.filter(w => w.words.length);
+  }
 
-  function startWrite(custom) {
-    show("write");
-    if (custom) {
-      // Accept the word with a prefix too ("הכלב" → "כלב")
-      const found = WORDS.find(w => wordMatches(custom, w[0]));
-      word = found ? found[0] : custom;
-      spoken = found ? found[1] : custom;
-      $("wordPic").textContent = found ? found[2] : "✏️";
+  let weeks = null;
+  async function loadWeeks() {
+    try {
+      const res = await fetch("words.txt", { cache: "no-cache" });
+      if (!res.ok) throw new Error(res.status);
+      const text = await res.text();
+      save("tp-words", text);
+      weeks = parseWords(text);
+    } catch (e) {
+      const saved = load("tp-words", null); // offline: use the last list this phone saw
+      weeks = saved ? parseWords(saved) : [];
+    }
+    const wk = weeks[weeks.length - 1];
+    $("dictTileInfo").textContent = wk ? wk.label + " · אומרים: ״הכתבה״" : "אומרים: ״הכתבה״";
+    return weeks;
+  }
+  const weeksReady = loadWeeks();
+
+  // Build this week's dictation: all of this week's words plus review words from earlier weeks,
+  // taking words the child got wrong before first.
+  function buildDictation() {
+    const wk = weeks[weeks.length - 1];
+    const fresh = wk.words.map(w => ({ ...w, review: false }));
+    const seen = new Set(fresh.map(w => w.written));
+    const older = [];
+    for (const w of weeks.slice(0, -1).flatMap(x => x.words)) {
+      if (!seen.has(w.written)) { seen.add(w.written); older.push({ ...w, review: true }); }
+    }
+    const missed = new Set(load("tp-missed", []));
+    const review = [...shuffle(older.filter(w => missed.has(w.written))), ...shuffle(older.filter(w => !missed.has(w.written)))].slice(0, REVIEW_COUNT);
+    return { key: wk.label + "|" + fresh.map(w => w.written).join(","), label: wk.label, words: shuffle([...fresh, ...review]), at: 0, marks: {}, stage: "words" };
+  }
+
+  let dict = null;
+
+  async function openDictation() {
+    hush(); show("dictIntro");
+    $("dictFacts").innerHTML = ""; setFb("introFb", "טוענים את המילים…");
+    $("startDictBtn").disabled = true; $("restartDictBtn").hidden = true;
+    await weeksReady;
+    if (current !== "dictIntro") return;
+    if (!weeks.length) {
+      $("weekTitle").textContent = "הכתבה";
+      setFb("introFb", "עוד אין מילים להכתבה. אמא או אבא מוסיפים אותן בקובץ words.txt.", "try");
+      return say("עוד אין מילים להכתבה. אמא או אבא צריכים להוסיף אותן.");
+    }
+    const wk = weeks[weeks.length - 1];
+    const reviewAvail = Math.min(REVIEW_COUNT, new Set(weeks.slice(0, -1).flatMap(x => x.words.map(w => w.written)).filter(w => !wk.words.some(n => n.written === w))).size);
+    const total = wk.words.length + reviewAvail;
+    $("weekTitle").textContent = "הכתבה · " + wk.label;
+    $("dictFacts").innerHTML = "";
+    for (const t of [total + " מילים: " + wk.words.length + " חדשות" + (reviewAvail ? " ו-" + reviewAvail + " לחזרה" : ""), "מכינים מחברת ועיפרון ✏️", "שומעים כל מילה, כותבים אותה, ולוחצים ״הבאה״"]) {
+      const li = document.createElement("li"); li.textContent = t; $("dictFacts").appendChild(li);
+    }
+    setFb("introFb", "");
+    const saved = load("tp-dict", null);
+    const resumable = saved && saved.label === wk.label && saved.key === buildKey(wk) && saved.stage !== "done";
+    $("startDictBtn").disabled = false;
+    if (resumable) {
+      dict = saved;
+      $("startDictBtn").textContent = saved.stage === "check" ? "ממשיכים לבדיקה" : "ממשיכים ממילה " + (saved.at + 1);
+      $("restartDictBtn").hidden = false;
+      say("ממשיכים את ההכתבה מאיפה שעצרנו?");
     } else {
-      let i; do { i = Math.floor(Math.random() * WORDS.length); } while (i === wordIdx && WORDS.length > 1);
-      wordIdx = i; [word, spoken] = WORDS[i]; $("wordPic").textContent = WORDS[i][2];
+      dict = null;
+      $("startDictBtn").textContent = "מתחילים!";
+      say("הכתבה! מכינים מחברת ועיפרון, ולוחצים מתחילים.");
     }
-    earnedWord = false;
-    $("letters").innerHTML = "";
-    for (const ch of word) { const s = document.createElement("span"); s.textContent = ch; $("letters").appendChild(s); }
-    setFb("writeFb", "");
-    sizeCanvases();
-    if (document.fonts) document.fonts.ready.then(() => { if (current === "write") { const r = trace.getBoundingClientRect(); drawGuide(r.width, r.height); } });
-    if (!voiceBlocked) setStatus("אומרים את המילה, או אומרים ״הבא״");
-    spell(true);
+  }
+  const buildKey = wk => wk.label + "|" + wk.words.map(w => w.written).join(",");
+
+  function startDictation(fromScratch) {
+    if (!weeks || !weeks.length) return;
+    if (fromScratch || !dict) dict = buildDictation();
+    save("tp-dict", dict);
+    if (dict.stage === "check") return showCheck();
+    showWord();
+  }
+  $("startDictBtn").onclick = () => startDictation(false);
+  $("restartDictBtn").onclick = () => startDictation(true);
+
+  function showWord() {
+    show("dictWord");
+    const n = dict.words.length;
+    $("wordNum").textContent = (dict.at + 1) + " / " + n;
+    $("barFill").style.width = (dict.at / n * 100) + "%";
+    $("prevBtn").disabled = dict.at === 0;
+    $("nextBtn").textContent = dict.at === n - 1 ? "סיימתי ←" : "הבאה ←";
+    if (!voiceBlocked) setStatus("אפשר להגיד: ״שוב״, ״לאט״ או ״הבאה״");
+    readWord();
   }
 
-  async function spell(intro) {
-    const spans = [...$("letters").children];
-    const chars = [...word];
-    if (intro && !(await say("בואו נכתוב: " + spoken + "!"))) return;
-    for (let i = 0; i < chars.length; i++) {
-      spans.forEach((s, j) => s.classList.toggle("on", j === i));
-      if (!(await say(LETTER_NAMES[chars[i]] || chars[i], 0.8))) { spans.forEach(s => s.classList.remove("on")); return; }
+  async function readWord(rate = 0.85) {
+    const w = dict.words[dict.at];
+    const sp = $("speakerBtn"); sp.classList.remove("talking"); void sp.offsetWidth; sp.classList.add("talking");
+    if (!(await say("מילה " + (dict.at + 1) + ".", 0.95))) return;
+    if (!(await say(w.spoken, rate))) return;
+    if (w.sentence) {
+      await pause(400);
+      if (!(await say(w.sentence, rate))) return;
+      await pause(400);
+      await say(w.spoken, rate);
     }
-    spans.forEach(s => s.classList.remove("on"));
-    if (!(await say(spoken + "!"))) return;
-    if (intro) say("עכשיו מעבירים את האצבע על האותיות האפורות.");
   }
 
-  function sizeCanvases() {
-    const r = trace.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    for (const cv of [guideCv, inkCv]) {
-      cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
-      cv.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+  function goWord(step) {
+    const n = dict.words.length;
+    const to = dict.at + step;
+    if (to < 0) return;
+    if (to >= n) {
+      dict.stage = "check"; save("tp-dict", dict);
+      say("סיימנו את ההכתבה! " + pick(PRAISE) + " עכשיו בודקים יחד.");
+      return showCheck(true);
     }
-    drawGuide(r.width, r.height);
-    drawn = 0;
+    dict.at = to; save("tp-dict", dict);
+    showWord();
+  }
+  $("speakerBtn").onclick = () => readWord();
+  $("slowBtn").onclick = () => readWord(0.6);
+  $("prevBtn").onclick = () => goWord(-1);
+  $("nextBtn").onclick = () => goWord(1);
+
+  function showCheck(silent) {
+    show("dictCheck");
+    $("barFill").style.width = "100%";
+    if (!voiceBlocked) setStatus("מסמנים ✓ או ✗ ליד כל מילה");
+    const list = $("checklist"); list.innerHTML = "";
+    dict.words.forEach((w, i) => {
+      const li = document.createElement("li");
+      const n = document.createElement("span"); n.className = "n"; n.textContent = i + 1;
+      const word = document.createElement("span"); word.className = "w"; word.textContent = w.written;
+      if (w.review) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "חזרה"; word.append(" ", t); }
+      const hear = document.createElement("button"); hear.className = "mini"; hear.textContent = "🔊"; hear.setAttribute("aria-label", "לשמוע את " + w.written);
+      hear.onclick = () => say(w.spoken);
+      const marks = document.createElement("div"); marks.className = "marks";
+      for (const [val, label, cls] of [[true, "✓", "yes"], [false, "✗", "no"]]) {
+        const b = document.createElement("button"); b.className = "mini mark " + cls; b.textContent = label;
+        b.setAttribute("aria-label", (val ? "נכון: " : "טעות: ") + w.written);
+        b.onclick = () => { dict.marks[i] = val; save("tp-dict", dict); renderMarks(); };
+        marks.appendChild(b);
+      }
+      li.append(n, word, hear, marks);
+      list.appendChild(li);
+    });
+    setFb("checkFb", "");
+    renderMarks();
+    if (!silent) say("בודקים יחד. מסמנים וי או איקס ליד כל מילה.");
   }
 
-  function drawGuide(w, h) {
-    gctx.clearRect(0, 0, w, h);
-    // Writing lines: letters sit between the top line and the baseline; ק and final letters drop below it
-    const top = h * 0.2, base = h * 0.7;
-    gctx.lineWidth = 2;
-    gctx.strokeStyle = css("--muted");
-    gctx.globalAlpha = 0.5;
-    gctx.setLineDash([]);
-    [top, base].forEach(y => { gctx.beginPath(); gctx.moveTo(12, y); gctx.lineTo(w - 12, y); gctx.stroke(); });
-    gctx.globalAlpha = 1;
-
-    const font = s => `500 ${s}px Rubik, "Arial Hebrew", sans-serif`;
-    let size = (base - top) * 1.4;
-    gctx.font = font(size);
-    const measured = gctx.measureText(word).width;
-    if (measured > w * 0.88) size *= (w * 0.88) / measured;
-    gctx.font = font(size);
-    gctx.direction = "rtl";
-    gctx.textAlign = "center"; gctx.textBaseline = "alphabetic";
-    gctx.fillStyle = css("--guide");
-    gctx.fillText(word, w / 2, base);
-    gctx.setLineDash([6, 7]);
-    gctx.lineWidth = 2;
-    gctx.strokeStyle = css("--muted");
-    gctx.strokeText(word, w / 2, base);
-    gctx.setLineDash([]);
+  function renderMarks() {
+    const items = [...$("checklist").children];
+    let right = 0, marked = 0;
+    items.forEach((li, i) => {
+      const m = dict.marks[i];
+      li.classList.toggle("ok", m === true); li.classList.toggle("miss", m === false);
+      li.querySelector(".yes").classList.toggle("on", m === true);
+      li.querySelector(".no").classList.toggle("on", m === false);
+      if (m !== undefined) marked++;
+      if (m === true) right++;
+    });
+    $("score").textContent = right + " נכונות מתוך " + dict.words.length;
+    $("finishCheckBtn").disabled = marked < dict.words.length || dict.stage === "done";
+    $("finishCheckBtn").textContent = marked < dict.words.length ? "מסמנים עוד " + (dict.words.length - marked) : "סיימנו לבדוק";
   }
 
-  // Finger drawing
-  let pen = null;
-  inkCv.addEventListener("pointerdown", e => {
-    inkCv.setPointerCapture(e.pointerId);
-    pen = { x: e.offsetX, y: e.offsetY };
-    ictx.lineCap = "round"; ictx.lineJoin = "round";
-    ictx.lineWidth = Math.max(8, trace.clientHeight / 22);
-    ictx.strokeStyle = css("--sea");
-  });
-  inkCv.addEventListener("pointermove", e => {
-    if (!pen) return;
-    ictx.beginPath(); ictx.moveTo(pen.x, pen.y); ictx.lineTo(e.offsetX, e.offsetY); ictx.stroke();
-    drawn += Math.hypot(e.offsetX - pen.x, e.offsetY - pen.y);
-    pen = { x: e.offsetX, y: e.offsetY };
-  });
-  const penUp = () => { pen = null; };
-  inkCv.addEventListener("pointerup", penUp);
-  inkCv.addEventListener("pointercancel", penUp);
-
-  function clearInk() { const r = trace.getBoundingClientRect(); ictx.clearRect(0, 0, r.width, r.height); drawn = 0; }
+  $("finishCheckBtn").onclick = () => {
+    if (dict.stage === "done") return;
+    const right = dict.words.filter((_, i) => dict.marks[i] === true).length;
+    // Remember mistakes so they come back as review words in the next weeks
+    const missed = new Set(load("tp-missed", []));
+    dict.words.forEach((w, i) => { if (dict.marks[i] === false) missed.add(w.written); else missed.delete(w.written); });
+    save("tp-missed", [...missed]);
+    dict.stage = "done"; save("tp-dict", dict);
+    addStars(right);
+    $("finishCheckBtn").disabled = true;
+    const total = dict.words.length;
+    const msg = right === total ? "הכול נכון! " + pick(PRAISE) : right + " מתוך " + total + ". " + pick(PRAISE) + " את המילים שהיו קשות נתרגל שוב בשבוע הבא.";
+    setFb("checkFb", "קיבלתם " + right + " ⭐", "good");
+    say(msg);
+  };
 
   function setFb(id, text, kind) {
     const el = $(id); el.textContent = text; el.className = "feedback" + (kind ? " " + kind : "");
   }
-
-  function wordDone() {
-    if (drawn < 60) { setFb("writeFb", "קודם מעבירים את האצבע על האותיות!", "try"); say("קודם מעבירים את האצבע על האותיות האפורות."); return; }
-    const p = pick(PRAISE);
-    setFb("writeFb", p + " ⭐", "good");
-    if (!earnedWord) { earnedWord = true; addStar(); }
-    say(p + " המילה " + spoken + " כתובה! אומרים הַבָּא למילה חדשה.");
-  }
-
-  function handleWrite(alts) {
-    if (saysPhrase(alts, ["מחק", "ניקוי", "לנקות", "תנקה", "תנקי"])) { clearInk(); return say("הכול נקי. מנסים שוב!"); }
-    if (saysPhrase(alts, ["סיימתי", "גמרתי", "סיימנו"])) return wordDone();
-    if (saidAny(alts, [word])) {
-      setFb("writeFb", "נכון! " + word + " ⭐", "good");
-      if (!earnedWord) { earnedWord = true; addStar(); }
-      return say("נכון! " + spoken + ". " + pick(PRAISE));
-    }
-    if (saysPhrase(alts, ["שוב", "עוד פעם", "חזור", "תחזור", "תחזרי", "איות", "לאיית", "אותיות"])) return spell(false);
-    if (saysPhrase(alts, ["הבא", "הבאה", "אחרת", "חדשה", "דלג", "עוד מילה"])) return startWrite();
-    setFb("writeFb", "מנסים להגיד: ״" + word + "״", "try");
-    say("הממ. אפשר להגיד " + spoken + "?");
-  }
-
-  $("spellBtn").onclick = () => spell(false);
-  $("clearBtn").onclick = clearInk;
-  $("doneBtn").onclick = wordDone;
-  $("nextWordBtn").onclick = () => startWrite();
-  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (current === "write") sizeCanvases(); }, 150); });
 
   // ---------- Animal game ----------
   let animal = null, clueAt = 0, solved = false, lastAnimal = -1;
@@ -600,7 +717,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       solved = true;
       $("mystery").textContent = animal.e; $("mystery").classList.add("found");
       $("choices").hidden = true;
-      addStar();
+      addStars(1);
       setFb("guessFb", "נכון! זה " + animal.name + "! ⭐", "good");
       return say("נכון! אני " + animal.name + "! " + pick(PRAISE) + " אומרים הַבָּא לחיה חדשה.");
     }
@@ -627,7 +744,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   function handleGuess(alts) {
     if (saysPhrase(alts, ["לא יודע", "לא יודעת", "מוותר", "מוותרת", "תגיד", "תגידי"])) return reveal();
     if (saysPhrase(alts, ["רמז", "עזרה", "תעזור", "תעזרי"])) return nextClue();
-    if (saysPhrase(alts, ["שוב", "עוד פעם", "חזור", "תחזור", "תחזרי"])) return say(animal.clues[clueAt]);
+    if (saysPhrase(alts, AGAIN)) return say(animal.clues[clueAt]);
     if (saysPhrase(alts, ["הבא", "הבאה", "חדשה", "אחרת", "דלג", "עוד חיה"])) return startGuess();
     guess(alts);
   }
