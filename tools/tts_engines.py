@@ -154,9 +154,9 @@ def candidates():
     return found + [Edge(EDGE_VOICE)]
 
 
-def pick_engines(most=4):
-    """The best working voice and up to three more as alternates (backup and pronunciation
-    fixes); each refusal is reported as a warning."""
+def pick_engines(most=6):
+    """The best working voice and the other working ones as alternates (for phrases it
+    can't record and for pronunciation fixes); each refusal is reported as a warning."""
     working = []
     for engine in candidates():
         try:

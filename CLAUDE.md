@@ -116,8 +116,10 @@ next clue; after the last clue, three picture choices appear.
   **Send the Gemini API voice only the Hebrew text**: it reads any instructions out
   loud along with the text (this happened with an English reading instruction). The Gemini API uses the secret
   `GEMINI_API_KEY` (a key from Google AI Studio, which needs no service account)
-  when it is set. The second working voice is a backup for phrases the first can't
-  record, e.g. over a daily limit, and the next run tries the first voice again. Without a key, or if Google
+  when it is set. Gemini has a daily quota: when a voice answers "429 ... quota" the
+  recorder stops asking it, and every phrase falls through the other working voices
+  down to Chirp 3 HD and WaveNet, so no phrase is ever left without a recording. The
+  next runs try the best voice again. Without a key, or if Google
   refuses them all, it uses Microsoft's `he-IL-HilaNeural` through edge-tts. Each
   refused voice is reported as a warning in the publish run, and the "Voice clips"
   step name shows the voice used. The repository variable `GOOGLE_TTS_VOICE` forces

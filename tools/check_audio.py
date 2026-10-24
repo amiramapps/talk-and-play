@@ -46,17 +46,22 @@ class Checker:
         except (OSError, ValueError):
             self.cache = {}
         self.errors = []
+        self.exhausted = False
         self.replaced = set()  # slow clips of rejected words, kept for the same reason
 
     def check(self, name, text):
         """Gemini's verdict on one clip, or None if Gemini could not be asked."""
         key = f"{name}|{text}"
         if key not in self.cache:
+            if self.exhausted:  # out of quota for today: the next run checks the rest
+                return None
             try:
                 with open(os.path.join(self.out, name), "rb") as f:
                     self.cache[key] = judge(f.read(), text)
             except Exception as e:
-                self.errors.append(" ".join(str(e).split())[:300])
+                err = " ".join(str(e).split())[:300]
+                self.errors.append(err)
+                self.exhausted = "429" in err and "quota" in err.lower()
                 return None
         return self.cache[key]
 

@@ -72,7 +72,7 @@ def app_phrases(path="js/content.js"):
 def main():
     os.makedirs(OUT, exist_ok=True)
     engine, alternates = pick_engines()
-    backup = alternates[0] if alternates else None
+    voices = [engine] + alternates  # every phrase falls through these until one records it
     clip_name = lambda eng, slow, text: hashlib.sha1(f"{eng.label}|{slow}|{text}".encode()).hexdigest()[:16] + ".mp3"
     jobs = {key: (text, slow) for text, slow, key in app_phrases() + dictation_phrases()}
 
@@ -83,7 +83,7 @@ def main():
         if os.path.exists(path) and os.path.getsize(path) > 0:
             return name, None
         err = "empty recording"
-        for attempt in range(tries):
+        for attempt in range(tries if not getattr(eng, "exhausted", False) else 0):
             try:
                 data = eng.mp3(text, slow)
                 if data:
@@ -92,17 +92,22 @@ def main():
                     return name, None
             except Exception as e:  # network hiccups and rate limits: wait and retry
                 err = " ".join(str(e).split())[:200]
+                if "429" in err and "quota" in err.lower():
+                    eng.exhausted = True  # used up for today: stop asking this voice
+                    break
             time.sleep(3 * 2 ** attempt)
         return None, err
 
     def one(item):
-        # Each run tries the best voice again; the backup voice covers what it couldn't record
+        # Each run tries the best voice again; the other voices cover what it couldn't record
         key, (text, slow) = item
-        existed = os.path.exists(os.path.join(OUT, clip_name(engine, slow, text)))
-        name, err = record(engine, text, slow, 4)
-        if not name and backup:
-            name, err = record(backup, text, slow, 3)
-        return key, name, err, bool(name) and not existed
+        name, err = None, "no voice left"
+        for i, eng in enumerate(voices):
+            existed = os.path.exists(os.path.join(OUT, clip_name(eng, slow, text)))
+            name, err = record(eng, text, slow, 4 if i == 0 else 2)
+            if name:
+                return key, name, None, not existed
+        return key, None, err, False
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         results = list(pool.map(one, jobs.items()))
@@ -111,9 +116,9 @@ def main():
     made = sum(1 for *_, new in results if new)
 
     # Count phrases the best voice could not record, before the check swaps any clips
-    by_backup = sum(1 for name in index.values() if backup and name in {clip_name(backup, sl, t) for t, sl in jobs.values()})
+    by_backup = sum(1 for k, (t, sl) in jobs.items() if k in index and index[k] != clip_name(engine, sl, t))
     if by_backup:
-        print(f"::warning::{by_backup} phrases were recorded with the backup voice {backup.label}; the next run tries {engine.label} again.")
+        print(f"::warning::{by_backup} phrases use another voice for now; the next run tries {engine.label} again.")
 
     # Gemini listens to each phrase and keeps a version that is pronounced right
     checked = right = 0
