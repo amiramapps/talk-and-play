@@ -108,8 +108,15 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .progress .num { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 .bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--sun); border-radius: inherit; transition: width .3s; }
+/* The ring around the speaker empties as the word's 15 seconds run out */
+.ring {
+  align-self: center; width: 176px; height: 176px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--sea) calc(var(--left, 1) * 1turn), var(--line) 0);
+}
+.timeleft { margin: 0; text-align: center; font-family: var(--display); font-weight: 600; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.btn.paused { background: var(--sun); border-color: var(--sun); color: #2A1E00; }
 .speaker {
-  align-self: center; width: 150px; height: 150px; border-radius: 50%; border: 0;
+  width: 150px; height: 150px; border-radius: 50%; border: 0;
   background: var(--sun); color: #2A1E00; font-size: 4rem; line-height: 1;
   display: grid; place-items: center; box-shadow: 0 6px 0 rgba(0,0,0,.14);
 }
@@ -195,7 +202,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
         <li><b>״רמז״</b> לשמוע עוד רמז על החיה</li>
         <li><b>״הביתה״</b> לחזור לכאן</li>
       </ul>
-      <p class="parents">להורים: <a href="https://github.com/amiramapps/talk-and-play/edit/main/words.txt" target="_blank" rel="noopener">מוסיפים את המילים של השבוע</a> בקובץ words.txt.</p>
+      <p class="parents">להורים: השבוע הוא <b id="weekNow">שבוע</b> בשנה. <a href="https://github.com/amiramapps/talk-and-play/edit/main/words.txt" target="_blank" rel="noopener">מוסיפים את המילים של השבוע</a> בקובץ words.txt.</p>
     </section>
 
     <!-- Dictation: get ready -->
@@ -216,10 +223,14 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       <div class="card">
         <div class="progress"><span>מילה</span><span class="num" id="wordNum">1 / 15</span></div>
         <div class="bar"><i id="barFill" style="width:0%"></i></div>
-        <button class="speaker" id="speakerBtn" aria-label="לשמוע את המילה שוב">🔊</button>
-        <p class="hint">כותבים את המילה במחברת, ואז לוחצים ״הבאה״.</p>
+        <div class="ring" id="ring"><button class="speaker" id="speakerBtn" aria-label="לשמוע את המילה שוב">🔊</button></div>
+        <p class="timeleft" id="timeLeft" aria-live="off">עוד 15 שניות</p>
+        <p class="hint">כותבים את המילה במחברת. המילה הבאה תגיע לבד.</p>
         <div class="row">
           <button class="btn" id="slowBtn">🐢 לאט</button>
+          <button class="btn" id="pauseBtn">⏸ רגע</button>
+        </div>
+        <div class="row">
           <button class="btn" id="prevBtn">→ הקודמת</button>
           <button class="btn main" id="nextBtn">הבאה ←</button>
         </div>
@@ -412,12 +423,14 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   });
 
   // ---------- Commands ----------
-  const HOME = ["הביתה","תפריט","מסך ראשי","להתחלה","עצור"];
+  const HOME = ["הביתה","תפריט","מסך ראשי","להתחלה"];
   const WANT_GUESS = ["חיה","חיות","לנחש","ניחוש","חידה","חידות"];
   const WANT_DICT = ["הכתבה","הכתבות","מילים","כתיבה","לכתוב"];
   const AGAIN = ["שוב","עוד פעם","חזור","תחזור","תחזרי","לא שמעתי","מה אמרת"];
   const SLOW = ["לאט","יותר לאט"];
-  const NEXT = ["הבא","הבאה","כתבתי","המשך","להמשיך","דלג"];
+  const NEXT = ["הבא","הבאה","כתבתי","דלג"];
+  const PAUSE = ["רגע","חכה","חכי","עצור","עצרי","הפסקה"];
+  const RESUME = ["ממשיכים","המשך","להמשיך","תמשיך","תמשיכי"];
   const PREV = ["הקודם","הקודמת","אחורה"];
   const START = ["מתחילים","להתחיל","מוכן","מוכנה","מוכנים","יאללה","כן"];
 
@@ -430,11 +443,13 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       return say("כשמוכנים עם מחברת ועיפרון, אומרים: מתחילים.");
     }
     if (current === "dictWord") {
-      if (saysPhrase(alts, SLOW)) return readWord(0.6);
+      if (saysPhrase(alts, SLOW)) return sayWord(0.6);
+      if (saysPhrase(alts, RESUME)) return setPaused(false);
+      if (saysPhrase(alts, PAUSE)) return setPaused(true);
       if (saysPhrase(alts, PREV)) return goWord(-1);
       if (saysPhrase(alts, NEXT)) return goWord(1);
-      if (saysPhrase(alts, AGAIN)) return readWord();
-      return say("אפשר להגיד: שוב, לאט, או הבאה.");
+      if (saysPhrase(alts, AGAIN)) return sayWord();
+      return say("אפשר להגיד: שוב, לאט, רגע, או הבאה.");
     }
     if (current === "dictCheck") return say("עכשיו בודקים יחד עם אמא או אבא, ומסמנים וי או איקס.");
     if (current === "guess") return handleGuess(alts);
@@ -445,6 +460,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "guess"];
   function show(id) {
     current = id;
+    if (id !== "dictWord") { stopTimer(); letScreenSleep(); }
     for (const s of SCREENS) $(s).hidden = s !== id;
     document.querySelector("main").scrollTop = 0;
   }
@@ -458,27 +474,52 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   $("goGuess").onclick = () => startGuess();
 
   // ---------- Weekly word lists (words.txt) ----------
-  // Format: a line starting with "שבוע" opens a week; then words, comma-separated or one per line,
-  // optionally "word | sentence". Lines starting with # are notes.
+  // Format: a line "שבוע 44" opens the list for week 44 of the year; then words, comma-separated or
+  // one per line, optionally "word | sentence". Lines starting with # are notes.
   function parseWords(text) {
-    const weeks = [];
+    const byNum = new Map();
     let week = null;
     const add = (raw, sentence) => {
-      const spoken = raw.trim();
-      const written = stripNiqqud(spoken).trim();
-      if (!written) return;
-      if (!week) { week = { label: "שבוע 1", words: [] }; weeks.push(week); }
-      week.words.push({ written, spoken, sentence: (sentence || "").trim() });
+      const spoken = raw.trim(), written = stripNiqqud(spoken).trim();
+      if (written) week.words.push({ written, spoken, sentence: (sentence || "").trim() });
     };
     for (let line of text.split(/\r?\n/)) {
       line = line.trim();
       if (!line || line.startsWith("#")) continue;
-      if (/^שבוע/.test(stripNiqqud(line))) { week = { label: line.replace(/[:\-–]+$/, "").trim(), words: [] }; weeks.push(week); continue; }
+      if (/^שבוע/.test(stripNiqqud(line))) {
+        // A later list for the same week number replaces the earlier one; a week without a number is skipped
+        const m = stripNiqqud(line).match(/^שבוע\s*(\d{1,2})(?!\d)/);
+        const num = m ? parseInt(m[1], 10) : 0;
+        week = num >= 1 && num <= 53 ? { num, label: "שבוע " + num, words: [] } : null;
+        if (week) byNum.set(num, week);
+        continue;
+      }
+      if (!week) continue;
       if (line.includes("|")) { const i = line.indexOf("|"); add(line.slice(0, i), line.slice(i + 1)); }
       else line.split(/[,،]/).forEach(w => add(w));
     }
-    return weeks.filter(w => w.words.length);
+    return [...byNum.values()].filter(w => w.words.length);
   }
+
+  // Week of the year for a Sunday-to-Saturday school week: Sunday counts with the Monday after it (ISO week)
+  function weekOfYear(d = new Date()) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const jan1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return Math.ceil(((t - jan1) / 86400000 + 1) / 7);
+  }
+  // Weeks are ordered by the school year, which starts at the end of August (week 35)
+  const schoolPos = n => (n - 35 + 53) % 53;
+  const thisWeek = weekOfYear();
+  $("weekNow").textContent = "שבוע " + thisWeek;
+
+  // This week's list, or the latest earlier list if this week's words weren't added yet
+  function currentWeek() {
+    const exact = weeks.find(w => w.num === thisWeek);
+    if (exact) return exact;
+    return weeks.filter(w => schoolPos(w.num) < schoolPos(thisWeek)).sort((a, b) => schoolPos(b.num) - schoolPos(a.num))[0] || null;
+  }
+  const earlierWeeks = wk => weeks.filter(w => schoolPos(w.num) < schoolPos(wk.num));
 
   let weeks = null;
   async function loadWeeks() {
@@ -492,28 +533,31 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       const saved = load("tp-words", null); // offline: use the last list this phone saw
       weeks = saved ? parseWords(saved) : [];
     }
-    const wk = weeks[weeks.length - 1];
-    $("dictTileInfo").textContent = wk ? wk.label + " · אומרים: ״הכתבה״" : "אומרים: ״הכתבה״";
+    $("dictTileInfo").textContent = "שבוע " + thisWeek + " · אומרים: ״הכתבה״";
     return weeks;
   }
   const weeksReady = loadWeeks();
 
-  // Build this week's dictation: all of this week's words plus review words from earlier weeks,
+  // Build the dictation: all of the week's words plus review words from earlier weeks,
   // taking words the child got wrong before first.
-  function buildDictation() {
-    const wk = weeks[weeks.length - 1];
-    const fresh = wk.words.map(w => ({ ...w, review: false }));
-    const seen = new Set(fresh.map(w => w.written));
+  function reviewPool(wk) {
+    const seen = new Set(wk.words.map(w => w.written));
     const older = [];
-    for (const w of weeks.slice(0, -1).flatMap(x => x.words)) {
+    for (const w of earlierWeeks(wk).flatMap(x => x.words)) {
       if (!seen.has(w.written)) { seen.add(w.written); older.push({ ...w, review: true }); }
     }
+    return older;
+  }
+  function buildDictation(wk) {
+    const fresh = wk.words.map(w => ({ ...w, review: false }));
+    const older = reviewPool(wk);
     const missed = new Set(load("tp-missed", []));
     const review = [...shuffle(older.filter(w => missed.has(w.written))), ...shuffle(older.filter(w => !missed.has(w.written)))].slice(0, REVIEW_COUNT);
-    return { key: wk.label + "|" + fresh.map(w => w.written).join(","), label: wk.label, words: shuffle([...fresh, ...review]), at: 0, marks: {}, stage: "words" };
+    return { key: buildKey(wk), label: wk.label, words: shuffle([...fresh, ...review]), at: 0, marks: {}, stage: "words" };
   }
+  const buildKey = wk => wk.label + "|" + wk.words.map(w => w.written).join(",");
 
-  let dict = null;
+  let dict = null, week = null;
 
   async function openDictation() {
     hush(); show("dictIntro");
@@ -521,22 +565,25 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     $("startDictBtn").disabled = true; $("restartDictBtn").hidden = true;
     await weeksReady;
     if (current !== "dictIntro") return;
-    if (!weeks.length) {
-      $("weekTitle").textContent = "הכתבה";
-      setFb("introFb", "עוד אין מילים להכתבה. אמא או אבא מוסיפים אותן בקובץ words.txt.", "try");
-      return say("עוד אין מילים להכתבה. אמא או אבא צריכים להוסיף אותן.");
+    week = currentWeek();
+    if (!week) {
+      $("weekTitle").textContent = "הכתבה · שבוע " + thisWeek;
+      setFb("introFb", "עוד אין מילים לשבוע " + thisWeek + ". אמא או אבא מוסיפים אותן בקובץ words.txt.", "try");
+      return say("עוד אין מילים להכתבה של השבוע. אמא או אבא צריכים להוסיף אותן.");
     }
-    const wk = weeks[weeks.length - 1];
-    const reviewAvail = Math.min(REVIEW_COUNT, new Set(weeks.slice(0, -1).flatMap(x => x.words.map(w => w.written)).filter(w => !wk.words.some(n => n.written === w))).size);
-    const total = wk.words.length + reviewAvail;
-    $("weekTitle").textContent = "הכתבה · " + wk.label;
-    $("dictFacts").innerHTML = "";
-    for (const t of [total + " מילים: " + wk.words.length + " חדשות" + (reviewAvail ? " ו-" + reviewAvail + " לחזרה" : ""), "מכינים מחברת ועיפרון ✏️", "שומעים כל מילה, כותבים אותה, ולוחצים ״הבאה״"]) {
-      const li = document.createElement("li"); li.textContent = t; $("dictFacts").appendChild(li);
-    }
+    const reviewAvail = Math.min(REVIEW_COUNT, reviewPool(week).length);
+    const total = week.words.length + reviewAvail;
+    $("weekTitle").textContent = "הכתבה · " + week.label;
+    const facts = [
+      total + " מילים: " + week.words.length + " חדשות" + (reviewAvail ? " ו-" + reviewAvail + " לחזרה" : ""),
+      "לכל מילה " + WORD_SECONDS + " שניות, והיא נשמעת 3 פעמים",
+      "מכינים מחברת ועיפרון ✏️"
+    ];
+    if (week.num !== thisWeek) facts.unshift("עוד אין מילים לשבוע " + thisWeek + ", אז עושים את " + week.label);
+    for (const t of facts) { const li = document.createElement("li"); li.textContent = t; $("dictFacts").appendChild(li); }
     setFb("introFb", "");
     const saved = load("tp-dict", null);
-    const resumable = saved && saved.label === wk.label && saved.key === buildKey(wk) && saved.stage !== "done";
+    const resumable = saved && saved.key === buildKey(week) && saved.stage !== "done";
     $("startDictBtn").disabled = false;
     if (resumable) {
       dict = saved;
@@ -546,20 +593,64 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     } else {
       dict = null;
       $("startDictBtn").textContent = "מתחילים!";
-      say("הכתבה! מכינים מחברת ועיפרון, ולוחצים מתחילים.");
+      say("הכתבה! מכינים מחברת ועיפרון. לכל מילה יש " + WORD_SECONDS + " שניות. לוחצים מתחילים.");
     }
   }
-  const buildKey = wk => wk.label + "|" + wk.words.map(w => w.written).join(",");
 
   function startDictation(fromScratch) {
-    if (!weeks || !weeks.length) return;
-    if (fromScratch || !dict) dict = buildDictation();
+    if (!week) return;
+    if (fromScratch || !dict) dict = buildDictation(week);
     save("tp-dict", dict);
     if (dict.stage === "check") return showCheck();
     showWord();
   }
   $("startDictBtn").onclick = () => startDictation(false);
   $("restartDictBtn").onclick = () => startDictation(true);
+
+  // ---------- Dictation timing ----------
+  // Each word gets 15 seconds: it is said at the start, again at 7.5 s and at 12 s, then the next word comes.
+  const WORD_SECONDS = 15, REPEAT_AT = [7.5, 12];
+  let timer = null, wakeLock = null;
+  function startTimer() {
+    stopTimer();
+    timer = { elapsed: 0, last: performance.now(), fired: 0, paused: false, id: setInterval(tick, 100) };
+    renderTimer();
+  }
+  function stopTimer() { if (timer) clearInterval(timer.id); timer = null; }
+  function tick() {
+    if (!timer) return;
+    const now = performance.now();
+    if (timer.paused || listening) { timer.last = now; return; } // hold the clock while paused or listening
+    timer.elapsed += (now - timer.last) / 1000;
+    timer.last = now;
+    if (timer.fired < REPEAT_AT.length && timer.elapsed >= REPEAT_AT[timer.fired]) { timer.fired++; sayWord(); }
+    if (timer.elapsed >= WORD_SECONDS) { goWord(1); return; }
+    renderTimer();
+  }
+  function renderTimer() {
+    const left = timer ? Math.max(0, WORD_SECONDS - timer.elapsed) : WORD_SECONDS;
+    const secs = Math.ceil(left);
+    $("ring").style.setProperty("--left", (left / WORD_SECONDS).toFixed(3));
+    $("timeLeft").textContent = timer && timer.paused ? "⏸ עצרנו. לוחצים ״ממשיכים״" : secs === 1 ? "עוד שנייה" : "עוד " + secs + " שניות";
+    $("pauseBtn").textContent = timer && timer.paused ? "▶ ממשיכים" : "⏸ רגע";
+    $("pauseBtn").classList.toggle("paused", !!(timer && timer.paused));
+  }
+  function setPaused(on) {
+    if (!timer || timer.paused === on) return;
+    timer.paused = on;
+    if (on) hush();
+    renderTimer();
+  }
+  async function keepScreenOn() {
+    try {
+      if (!wakeLock && navigator.wakeLock) {
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => { wakeLock = null; });
+      }
+    } catch (e) {}
+  }
+  function letScreenSleep() { if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; } }
+  document.addEventListener("visibilitychange", () => { if (document.hidden) setPaused(true); });
 
   function showWord() {
     show("dictWord");
@@ -568,27 +659,30 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     $("barFill").style.width = (dict.at / n * 100) + "%";
     $("prevBtn").disabled = dict.at === 0;
     $("nextBtn").textContent = dict.at === n - 1 ? "סיימתי ←" : "הבאה ←";
-    if (!voiceBlocked) setStatus("אפשר להגיד: ״שוב״, ״לאט״ או ״הבאה״");
-    readWord();
+    if (!voiceBlocked) setStatus("אפשר להגיד: ״שוב״, ״לאט״, ״רגע״ או ״הבאה״");
+    keepScreenOn();
+    startTimer();
+    announceWord();
   }
 
-  async function readWord(rate = 0.85) {
+  function sayWord(rate = 0.85) {
+    const sp = $("speakerBtn"); sp.classList.remove("talking"); void sp.offsetWidth; sp.classList.add("talking");
+    return say(dict.words[dict.at].spoken, rate);
+  }
+  // The first reading: "המילה הבאה: ספר", then the sentence if the parent added one
+  async function announceWord() {
     const w = dict.words[dict.at];
     const sp = $("speakerBtn"); sp.classList.remove("talking"); void sp.offsetWidth; sp.classList.add("talking");
-    if (!(await say("מילה " + (dict.at + 1) + ".", 0.95))) return;
-    if (!(await say(w.spoken, rate))) return;
-    if (w.sentence) {
-      await pause(400);
-      if (!(await say(w.sentence, rate))) return;
-      await pause(400);
-      await say(w.spoken, rate);
-    }
+    const intro = dict.at === 0 ? "המילה הראשונה: " : "המילה הבאה: ";
+    if (!(await say(intro + w.spoken + ".", 0.85))) return;
+    if (w.sentence) { await pause(300); await say(w.sentence, 0.85); }
   }
 
   function goWord(step) {
     const n = dict.words.length;
     const to = dict.at + step;
     if (to < 0) return;
+    stopTimer();
     if (to >= n) {
       dict.stage = "check"; save("tp-dict", dict);
       say("סיימנו את ההכתבה! " + pick(PRAISE) + " עכשיו בודקים יחד.");
@@ -597,8 +691,9 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     dict.at = to; save("tp-dict", dict);
     showWord();
   }
-  $("speakerBtn").onclick = () => readWord();
-  $("slowBtn").onclick = () => readWord(0.6);
+  $("speakerBtn").onclick = () => sayWord();
+  $("slowBtn").onclick = () => sayWord(0.6);
+  $("pauseBtn").onclick = () => setPaused(!(timer && timer.paused));
   $("prevBtn").onclick = () => goWord(-1);
   $("nextBtn").onclick = () => goWord(1);
 

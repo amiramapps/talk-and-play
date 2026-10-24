@@ -17,17 +17,23 @@ the kids' phones get the new version the next time they open the app.
 
 ## Weekly dictation words
 
-Every week, open [`words.txt`](words.txt), click the pencil, and add a new week at the
-end of the file:
+Every week, open [`words.txt`](words.txt), click the pencil, and add the list for that
+week's number in the year (1-52). Weeks run Sunday to Saturday, and the app's home
+screen shows the current week number.
 
 ```
-שבוע 3
+שבוע 44
 מילה, מילה, מילה, ...
 ```
 
-- The dictation uses the **last week** in the file (10 new words) plus **5 review words**
-  from earlier weeks. Words the child got wrong are picked for review first.
+- The dictation uses **this week's** words (10 new words) plus **5 review words** from
+  earlier weeks. Words the child got wrong are picked for review first.
+- If this week's list is missing, the app uses the latest earlier list. Lists for future
+  weeks can be added ahead of time.
+- Each word gets **15 seconds**: the app says "המילה הבאה: …", repeats the word at 7.5 and
+  12 seconds, then moves on. The child can pause, repeat or skip ahead.
 - To have the app read a sentence too, write it after a `|`: `ספר | קראתי ספר מעניין`
 - If the voice mispronounces a word, write it with niqqud (`סֵפֶר`). Niqqud is not shown
   when checking.
-- Lines starting with `#` are notes and are skipped.
+- Lines starting with `#` are notes and are skipped. At the start of a new school year,
+  delete last year's weeks.
