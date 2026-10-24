@@ -36,10 +36,13 @@ jobs:
 
       # If recording fails the app still works, using the phone's own voice
       - name: Record new phrases with the Hebrew voice
+        id: voice
         continue-on-error: true
         run: |
           pip install --quiet "edge-tts>=7,<8"
           python tools/make_audio.py
+      - name: "Voice clips: ${{ steps.voice.outputs.clips || 0 }} (${{ steps.voice.outcome }})"
+        run: ls audio/*.mp3 2>/dev/null | wc -l
 
       - name: Save recorded voice clips
         if: always()

@@ -113,6 +113,9 @@ async def main():
         json.dump(index, f, ensure_ascii=False, indent=0, sort_keys=True)
 
     print(f"{len(index)} of {len(jobs)} phrases have a clip ({made} recorded now, voice {VOICE}).")
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"clips={len(index)} of {len(jobs)}\n")
     for line in failed:
         print("  not recorded:", line)
     return 0 if index else 1
