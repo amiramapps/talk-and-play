@@ -95,8 +95,8 @@ def review(index, words, alternates, record, out):
             alt_verdict = checker.check(alt, text) if alt else None
             if alt_verdict and alt_verdict["match"]:
                 index[key] = alt
-                slow_alt, _ = record(other, text, True, 2)
-                if slow_alt:
+                slow_alt, _ = record(other, text, True, 2) if "slow:" + text in index else (None, None)
+                if slow_alt and "slow:" + text in index:  # only dictation words have a slow version
                     checker.replaced.add(index.get("slow:" + text))
                     index["slow:" + text] = slow_alt
                 lines.append(f"::notice::{text} sounded wrong ({verdict.get('latin')}), "
