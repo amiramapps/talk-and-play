@@ -90,7 +90,7 @@ def main():
                         f.write(data)
                     return key, name, None, True
             except Exception as e:  # network hiccups and rate limits: wait and retry
-                err = str(e)[:200]
+                err = " ".join(str(e).split())[:200]
             time.sleep(3 * 2 ** attempt)
         return key, None, err, False
 

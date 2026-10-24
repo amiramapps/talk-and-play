@@ -115,5 +115,6 @@ def pick_engine():
                 return engine
             raise RuntimeError("the recording came back empty")
         except Exception as e:
-            print(f"::warning::Voice {engine.label} is not available: {str(e)[:300]}")
+            reason = " ".join(str(e).split())  # one line: a warning ends at the first line break
+            print(f"::warning::Voice {engine.label} is not available: {reason[:600]}")
     raise SystemExit("No voice could record anything.")
