@@ -8,9 +8,9 @@ import base64
 import json
 import os
 
-from tts_engines import GEMINI_KEY, _post
+from tts_engines import GEMINI_KEY, _post, check_model
 
-MODEL = os.environ.get("GEMINI_CHECK_MODEL", "").strip() or "gemini-2.5-flash"
+MODEL = None  # chosen on first use: the newest Flash model the key may use
 PROMPT = """This audio is a recording of Hebrew text for a first-grade dictation in Israel.
 The intended text, with niqqud, is: {text}
 
@@ -24,6 +24,8 @@ Listen carefully and answer in JSON with these fields:
 
 
 def judge(mp3, text):
+    global MODEL
+    MODEL = MODEL or check_model()
     data = _post(
         f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={GEMINI_KEY}",
         {"contents": [{"parts": [
@@ -101,6 +103,7 @@ def review(index, words, backup, record, out):
             lines.append(f"::warning::Pronunciation of {text}: heard {verdict.get('heard')} "
                          f"({verdict.get('latin')}), expected {verdict.get('intended_latin')}. "
                          f"{verdict.get('problem', '')}")
+    lines.append(f"::notice::Pronunciation checked by {MODEL}")
     for err in checker.errors[:3]:
         lines.append(f"::warning::Pronunciation check could not ask Gemini: {err}")
     checker.save(set(index.values()))

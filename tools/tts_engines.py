@@ -11,6 +11,7 @@ Cloud voice by name, e.g. he-IL-Wavenet-C.
 import base64
 import json
 import os
+import re
 import subprocess
 import tempfile
 import urllib.error
@@ -95,12 +96,49 @@ class Edge:
             return open(f.name, "rb").read()
 
 
+_models = None
+
+
+def gemini_models():
+    """The Gemini API models this key may use (names change as Google releases new ones)."""
+    global _models
+    if _models is None:
+        _models = []
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key={GEMINI_KEY}"
+            with urllib.request.urlopen(url, timeout=30) as res:
+                _models = [m["name"].split("/", 1)[1] for m in json.load(res).get("models", [])
+                           if "generateContent" in m.get("supportedGenerationMethods", [])]
+        except Exception as e:
+            print(f"::warning::Could not list Gemini models: {' '.join(str(e).split())[:300]}")
+    return _models
+
+
+def _newest_first(names):
+    version = lambda n: tuple(int(x) for x in re.findall(r"\d+", n.split("-", 1)[-1])[:2])
+    return sorted(names, key=lambda n: (version(n), "pro" in n, "preview" not in n), reverse=True)
+
+
+def tts_models():
+    return _newest_first([m for m in gemini_models() if "tts" in m])[:3]
+
+
+def check_model():
+    """The newest regular Flash model, used to listen to the recordings."""
+    forced = os.environ.get("GEMINI_CHECK_MODEL", "").strip()
+    skip = ("tts", "image", "live", "lite", "audio", "embedding", "thinking")
+    found = _newest_first([m for m in gemini_models() if "flash" in m and not any(w in m for w in skip)])
+    return forced or (found[0] if found else "gemini-3.8-flash")
+
+
 def candidates():
     found = []
     if KEY and not FORCED_VOICE:
         found += [CloudTTS("Kore", model="gemini-2.5-pro-tts"), CloudTTS("Kore", model="gemini-2.5-flash-tts")]
     if GEMINI_KEY and not FORCED_VOICE:
-        found += [GeminiAPI("Kore", "gemini-2.5-pro-preview-tts"), GeminiAPI("Kore", "gemini-2.5-flash-preview-tts")]
+        models = tts_models()
+        print(f"::notice::Gemini voice models available: {', '.join(models) or 'none'}")
+        found += [GeminiAPI("Kore", m) for m in models]
     if KEY:
         found += [CloudTTS(FORCED_VOICE)] if FORCED_VOICE else [CloudTTS("he-IL-Chirp3-HD-Kore"), CloudTTS("he-IL-Wavenet-A")]
     return found + [Edge(EDGE_VOICE)]
