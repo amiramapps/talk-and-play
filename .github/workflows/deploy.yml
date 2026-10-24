@@ -45,7 +45,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_TTS_VOICE: ${{ vars.GOOGLE_TTS_VOICE }}
         run: |
-          pip install --quiet "edge-tts>=7,<8"
+          pip install --quiet "edge-tts>=7,<8" "lameenc>=1.7,<2"
           python tools/make_audio.py
       - name: "Voice clips: ${{ steps.voice.outputs.clips || 0 }} with ${{ steps.voice.outputs.voice || 'no voice' }} (${{ steps.voice.outcome }})"
         run: ls audio/*.mp3 2>/dev/null | wc -l

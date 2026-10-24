@@ -71,7 +71,8 @@ def app_phrases(path="js/content.js"):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    engine, backup = pick_engines()
+    engine, alternates = pick_engines()
+    backup = alternates[0] if alternates else None
     clip_name = lambda eng, slow, text: hashlib.sha1(f"{eng.label}|{slow}|{text}".encode()).hexdigest()[:16] + ".mp3"
     jobs = {key: (text, slow) for text, slow, key in app_phrases() + dictation_phrases()}
 
@@ -119,7 +120,7 @@ def main():
     rejected = set()
     if GEMINI_KEY:
         words = [(text, key) for text, slow, key in dictation_phrases() if not slow and key == text]
-        checked, right, lines, rejected = review(index, words, backup, lambda *a: record(*a), OUT)
+        checked, right, lines, rejected = review(index, words, alternates, lambda *a: record(*a), OUT)
         for line in lines:
             print(" ".join(line.split()))
 

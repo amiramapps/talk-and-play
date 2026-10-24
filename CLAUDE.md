@@ -111,7 +111,8 @@ next clue; after the last clue, three picture choices appear.
   repository secret `GOOGLE_TTS_KEY`, `tools/tts_engines.py` tries the voices best
   first and records with the first one the key unlocks: Gemini (`gemini-2.5-pro-tts`,
   then `gemini-2.5-flash-tts`) in Google Cloud Text-to-Speech, a Gemini TTS model
-  through the Gemini API, Chirp 3 HD, then WaveNet. The Gemini API uses the secret
+  through the Gemini API (the newest models the key may use, found by listing them),
+  Chirp 3 HD, then WaveNet. Gemini audio is encoded to mp3 with the `lameenc` package. The Gemini API uses the secret
   `GEMINI_API_KEY` (a key from Google AI Studio, which needs no service account)
   when it is set. The second working voice is a backup for phrases the first can't
   record, e.g. over a daily limit, and the next run tries the first voice again. Without a key, or if Google
@@ -122,7 +123,8 @@ next clue; after the last clue, three picture choices appear.
 - **The owner's biggest problem is words read with the wrong pronunciation**, more
   than the sound of the voice. With a Gemini key, `tools/check_audio.py` has Gemini
   listen to every dictation word after recording. A word that sounds wrong is tried
-  with the backup voice, and kept if that one sounds right. The rest are reported as
+  with each of the other working voices in turn, and the first one that sounds right
+  is kept. (The first real check found Chirp 3 HD misreading 10 of 20 words.) The rest are reported as
   "Pronunciation of …" warnings in the publish run, with what was heard and what was
   expected, and the step "Pronunciation check: N of M words sound right" sums it up.
   Fix a reported word in `words.txt` (different niqqud, or a sentence after `|`).

@@ -71,10 +71,11 @@ class Checker:
             json.dump(keep, f, ensure_ascii=False, indent=0)
 
 
-def review(index, words, backup, record, out):
-    """Check every dictation word; where the clip sounds wrong, try the backup voice.
+def review(index, words, alternates, record, out):
+    """Check every dictation word; where the clip sounds wrong, try the other voices in turn.
 
-    words: (text, key) pairs. record(engine, text, slow, tries) -> (file name, error).
+    words: (text, key) pairs. alternates: other working voices, best first.
+    record(engine, text, slow, tries) -> (file name, error).
     Returns (number checked, number pronounced right, report lines, clips to keep).
     """
     checker, lines, checked, right = Checker(out), [], 0, 0
@@ -84,18 +85,19 @@ def review(index, words, backup, record, out):
         verdict = checker.check(index[key], text)
         if verdict is None:
             continue
-        if not verdict["match"] and backup:
-            alt, _ = record(backup, text, False, 2)
+        for other in alternates if not verdict["match"] else []:
+            alt, _ = record(other, text, False, 2)
             alt_verdict = checker.check(alt, text) if alt else None
             if alt_verdict and alt_verdict["match"]:
                 index[key] = alt
-                slow_alt, _ = record(backup, text, True, 2)
+                slow_alt, _ = record(other, text, True, 2)
                 if slow_alt:
                     checker.replaced.add(index.get("slow:" + text))
                     index["slow:" + text] = slow_alt
                 lines.append(f"::notice::{text} sounded wrong ({verdict.get('latin')}), "
-                             f"so it now uses {backup.label}: {alt_verdict.get('latin')}")
+                             f"so it now uses {other.label}: {alt_verdict.get('latin')}")
                 verdict = alt_verdict
+                break
         checked += 1
         if verdict["match"]:
             right += 1

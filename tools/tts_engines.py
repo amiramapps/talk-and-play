@@ -76,9 +76,18 @@ class GeminiAPI:
              "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {
                  "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": self.voice}}}}})
         pcm = base64.b64decode(data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
-        return subprocess.run(
-            ["ffmpeg", "-loglevel", "error", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0",
-             "-b:a", "64k", "-f", "mp3", "pipe:1"], input=pcm, capture_output=True, check=True).stdout
+        try:
+            import lameenc  # pip package with its own mp3 encoder, so no ffmpeg is needed
+        except ImportError:
+            return subprocess.run(
+                ["ffmpeg", "-loglevel", "error", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0",
+                 "-b:a", "64k", "-f", "mp3", "pipe:1"], input=pcm, capture_output=True, check=True).stdout
+        enc = lameenc.Encoder()
+        enc.set_bit_rate(64)
+        enc.set_in_sample_rate(24000)
+        enc.set_channels(1)
+        enc.set_quality(2)
+        return enc.encode(pcm) + enc.flush()
 
 
 class Edge:
@@ -144,14 +153,15 @@ def candidates():
     return found + [Edge(EDGE_VOICE)]
 
 
-def pick_engines():
-    """The first two engines that record a test phrase; each refusal is reported as a warning."""
+def pick_engines(most=4):
+    """The best working voice and up to three more as alternates (backup and pronunciation
+    fixes); each refusal is reported as a warning."""
     working = []
     for engine in candidates():
         try:
             if len(engine.mp3("שָׁלוֹם, בּוֹאוּ נְשַׂחֵק.", False)) > 1000:
                 working.append(engine)
-                if len(working) == 2:
+                if len(working) == most:
                     break
                 continue
             raise RuntimeError("the recording came back empty")
@@ -160,4 +170,4 @@ def pick_engines():
             print(f"::warning::Voice {engine.label} is not available: {reason[:600]}")
     if not working:
         raise SystemExit("No voice could record anything.")
-    return working[0], (working[1] if len(working) > 1 else None)
+    return working[0], working[1:]
