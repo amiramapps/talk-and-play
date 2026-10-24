@@ -37,3 +37,12 @@ screen shows the current week number.
   when checking.
 - Lines starting with `#` are notes and are skipped. At the start of a new school year,
   delete last year's weeks.
+
+## The voice
+
+Every time something changes on `main`, the publish workflow records each phrase the app
+says, including every dictation word at normal and slow speed, with Microsoft's neural
+Hebrew voice (`he-IL-HilaNeural`, through [edge-tts](https://github.com/rany2/edge-tts)).
+The app plays those recordings and uses the phone's own voice only for anything missing.
+To try the male voice, set `TTS_VOICE: he-IL-AvriNeural` for the recording step in
+`.github/workflows/deploy.yml`.

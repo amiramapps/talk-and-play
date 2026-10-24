@@ -22,11 +22,38 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Build index.html from app.html
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Clips recorded on earlier runs, so only new words and phrases are recorded
+      - name: Restore recorded voice clips
+        uses: actions/cache/restore@v4
+        with:
+          path: audio
+          key: voice-${{ github.run_id }}
+          restore-keys: voice-
+
+      # If recording fails the app still works, using the phone's own voice
+      - name: Record new phrases with the Hebrew voice
+        continue-on-error: true
+        run: |
+          pip install --quiet "edge-tts>=7,<8"
+          python tools/make_audio.py
+
+      - name: Save recorded voice clips
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: audio
+          key: voice-${{ github.run_id }}
+
+      - name: Build the site
         run: |
           sh build.sh
           mkdir -p _site
           cp index.html manifest.json icon.svg words.txt _site/
+          if [ -f audio/index.json ]; then cp -r audio _site/; fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
