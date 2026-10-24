@@ -1,4 +1,4 @@
-"""Listen to recorded dictation words with Gemini and check how they are pronounced.
+"""Listen to every recorded phrase with Gemini and check how it is pronounced.
 
 Gemini hears each clip and reports what was said (with niqqud and in Latin letters),
 how the intended word should sound, and whether the two match. Verdicts are cached
@@ -11,7 +11,7 @@ import os
 from tts_engines import GEMINI_KEY, _post, check_model
 
 MODEL = None  # chosen on first use: the newest Flash model the key may use
-PROMPT = """This audio is a recording of Hebrew text for a first-grade dictation in Israel.
+PROMPT = """This audio is a recording of Hebrew text from a learning app for first-graders in Israel.
 The intended text, with niqqud, is: {text}
 
 Listen carefully and answer in JSON with these fields:

@@ -67,12 +67,13 @@ class GeminiAPI:
 
     def __init__(self, voice, model):
         self.voice, self.model = voice, model
-        self.label = f"{model}/{voice}"
+        self.label = f"{model}/{voice}/text-only"  # a new name, so clips from the old request are re-recorded
 
     def mp3(self, text, slow):
         data = _post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={GEMINI_KEY}",
-            {"contents": [{"parts": [{"text": STYLE[slow] + "\n\n" + text}]}],
+            # Only the Hebrew text: the model reads any instructions out loud along with it
+            {"contents": [{"parts": [{"text": text}]}],
              "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {
                  "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": self.voice}}}}})
         pcm = base64.b64decode(data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])

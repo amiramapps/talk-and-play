@@ -115,11 +115,12 @@ def main():
     if by_backup:
         print(f"::warning::{by_backup} phrases were recorded with the backup voice {backup.label}; the next run tries {engine.label} again.")
 
-    # Gemini listens to each dictation word and keeps a version that is pronounced right
+    # Gemini listens to each phrase and keeps a version that is pronounced right
     checked = right = 0
     rejected = set()
     if GEMINI_KEY:
-        words = [(text, key) for text, slow, key in dictation_phrases() if not slow and key == text]
+        # Every phrase, not only the words: a voice can add or misread anything
+        words = [(text, key) for text, slow, key in app_phrases() + dictation_phrases() if not slow]
         checked, right, lines, rejected = review(index, words, alternates, lambda *a: record(*a), OUT)
         for line in lines:
             print(" ".join(line.split()))
