@@ -60,12 +60,23 @@ function unlockAudio() {
   if (!AC) return;
   const first = !actx;
   if (first) actx = new AC();
-  if (actx.state === "suspended") actx.resume();
+  if (actx.state !== "running") {
+    actx.resume().catch(() => {});
+    // iPhones switch sound on only when something plays inside the tap itself
+    const s = actx.createBufferSource();
+    s.buffer = actx.createBuffer(1, 1, 22050); s.connect(actx.destination); s.start(0);
+  }
   if (first) clipsReady.then(() => preload([...Object.values(P), ...PRAISE]));
 }
-// Browsers only allow sound after a tap, so the audio is switched on by the first touch
-document.addEventListener("pointerdown", unlockAudio, true);
-document.addEventListener("keydown", unlockAudio, true);
+// Browsers allow sound only after a tap. iPhones count the finger lifting (touchend, click),
+// not touching down, so the sound is switched on by all of these.
+for (const type of ["pointerdown", "touchend", "click", "keydown"]) document.addEventListener(type, unlockAudio, true);
+
+// For parents: which voice the app is really using (shown on the home screen)
+function noteVoice(recorded) {
+  const text = recorded ? "קול: הקלטה (" + (clips.__voice || "") + ")" : "קול: הקול של הטלפון";
+  if ($("voiceInfo").textContent !== text) $("voiceInfo").textContent = text;
+}
 
 function getBuffer(file) {
   if (!buffers.has(file)) {
@@ -83,7 +94,10 @@ function preload(texts) {
 }
 async function playClip(file) {
   const buf = await getBuffer(file);
-  if (actx.state === "suspended") await actx.resume();
+  if (actx.state !== "running") {
+    await Promise.race([actx.resume(), new Promise(r => setTimeout(r, 600))]);
+    if (actx.state !== "running") throw new Error("sound is still off"); // the phone's voice takes over
+  }
   return new Promise(res => {
     const s = actx.createBufferSource();
     s.buffer = buf; s.connect(actx.destination);
@@ -120,6 +134,7 @@ async function say(parts, slow = false) {
     const file = (slow && clips["slow:" + text]) || clips[text];
     let played = false;
     if (file && actx) { try { await playClip(file); played = true; } catch (e) {} }
+    noteVoice(played);
     if (!played && token === speakToken) await speakDevice(text, slow ? 0.6 : 0.9);
   }
   return token === speakToken;

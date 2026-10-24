@@ -2,32 +2,25 @@
 """Record every phrase the app says with a natural Hebrew voice.
 
 Writes audio/<id>.mp3 plus audio/index.json, which maps each phrase to its file
-("slow:" + word for the slow version of a dictation word). Phrases come from
-words.txt (dictation words and sentences) and from js/content.js.
-Clips that already exist are kept, so each run only records new phrases.
-
-Voice: with a GOOGLE_TTS_KEY (Google Cloud Text-to-Speech API key) the clips are
-recorded with Google's Hebrew WaveNet voice (GOOGLE_TTS_VOICE, default
-he-IL-Wavenet-A). Without a key, or if Google refuses the key, Microsoft's neural
-Hebrew voice is used through edge-tts (TTS_VOICE, default he-IL-HilaNeural).
+("slow:" + word for the slow version of a dictation word, "__voice" for the voice
+used). Phrases come from words.txt (dictation words and sentences) and from
+js/content.js. Clips that already exist are kept, so each run only records new
+phrases. The voice is chosen in tts_engines.py: the best Google voice the
+GOOGLE_TTS_KEY unlocks, otherwise Microsoft's Hila voice.
 Run from the repository root:  python tools/make_audio.py
 """
-import asyncio
-import base64
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
-import urllib.error
-import urllib.request
+import time
+from concurrent.futures import ThreadPoolExecutor
 
-GOOGLE_KEY = os.environ.get("GOOGLE_TTS_KEY", "").strip()
-GOOGLE_VOICE = os.environ.get("GOOGLE_TTS_VOICE", "").strip() or "he-IL-Wavenet-A"
-EDGE_VOICE = os.environ.get("TTS_VOICE", "").strip() or "he-IL-HilaNeural"
-RATE, SLOW_RATE = "-5%", "-35%"
-GOOGLE_SPEED = {RATE: 0.95, SLOW_RATE: 0.7}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from tts_engines import pick_engine  # noqa: E402
+
 OUT = "audio"
 
 
@@ -57,8 +50,8 @@ def dictation_phrases(path="words.txt"):
                 words, sentences = [w.strip() for w in re.split(r"[,،]", line)], []
             for w in words:
                 if strip_niqqud(w).strip():
-                    phrases += [(w, RATE, w), (w, SLOW_RATE, "slow:" + w)]
-            phrases += [(s, RATE, s) for s in sentences if s]
+                    phrases += [(w, False, w), (w, True, "slow:" + w)]
+            phrases += [(s, False, s) for s in sentences if s]
     return phrases
 
 
@@ -72,80 +65,40 @@ def app_phrases(path="js/content.js"):
     texts = list(data["P"].values()) + data["NUMS"] + data["PRAISE"] + list(data["LETTER_NAMES"].values())
     for animal in data["ANIMALS"]:
         texts += [animal["name"], *animal["clues"]]
-    return [(t.strip(), RATE, t.strip()) for t in texts if t.strip()]
+    return [(t.strip(), False, t.strip()) for t in texts if t.strip()]
 
 
-def google_mp3(text, rate):
-    body = json.dumps({
-        "input": {"text": text},
-        "voice": {"languageCode": "he-IL", "name": GOOGLE_VOICE},
-        "audioConfig": {"audioEncoding": "MP3", "speakingRate": GOOGLE_SPEED[rate]},
-    }).encode()
-    req = urllib.request.Request(
-        "https://texttospeech.googleapis.com/v1/text:synthesize?key=" + GOOGLE_KEY,
-        data=body, headers={"Content-Type": "application/json; charset=utf-8"})
-    try:
-        with urllib.request.urlopen(req, timeout=30) as res:
-            return base64.b64decode(json.load(res)["audioContent"])
-    except urllib.error.HTTPError as e:  # show Google's reason, e.g. the API is not enabled
-        raise RuntimeError(f"Google said {e.code}: {e.read().decode(errors='replace')[:300]}") from None
-
-
-async def record(engine, text, rate, path):
-    if engine == "google":
-        data = await asyncio.to_thread(google_mp3, text, rate)
-        with open(path, "wb") as f:
-            f.write(data)
-    else:
-        import edge_tts
-        await edge_tts.Communicate(text, EDGE_VOICE, rate=rate).save(path)
-
-
-def pick_engine():
-    """Google when a working key is set, otherwise edge-tts."""
-    if not GOOGLE_KEY:
-        return "edge", EDGE_VOICE
-    try:
-        google_mp3("שלום", RATE)
-        return "google", GOOGLE_VOICE
-    except Exception as e:
-        print(f"::warning::Google Text-to-Speech refused the key, using {EDGE_VOICE} instead. {e}")
-        return "edge", EDGE_VOICE
-
-
-async def main():
+def main():
     os.makedirs(OUT, exist_ok=True)
-    engine, voice = pick_engine()
+    engine = pick_engine()
     jobs = {}
-    for text, rate, key in app_phrases() + dictation_phrases():
-        name = hashlib.sha1(f"{voice}|{rate}|{text}".encode()).hexdigest()[:16] + ".mp3"
-        jobs[key] = (text, rate, name)
+    for text, slow, key in app_phrases() + dictation_phrases():
+        name = hashlib.sha1(f"{engine.label}|{slow}|{text}".encode()).hexdigest()[:16] + ".mp3"
+        jobs[key] = (text, slow, name)
 
-    index, failed, made = {}, [], 0
-    limit = asyncio.Semaphore(4)
-
-    async def one(key, text, rate, name):
-        nonlocal made
+    def one(item):
+        key, (text, slow, name) = item
         path = os.path.join(OUT, name)
         if os.path.exists(path) and os.path.getsize(path) > 0:
-            index[key] = name
-            return
-        async with limit:
-            for attempt in range(3):
-                try:
-                    await record(engine, text, rate, path)
-                    if os.path.getsize(path) > 0:
-                        index[key] = name
-                        made += 1
-                        return
-                except Exception as e:  # network hiccups: retry, then leave it to the phone's voice
-                    err = e
-                await asyncio.sleep(2 * (attempt + 1))
-            failed.append(f"{key}: {err if 'err' in locals() else 'empty file'}")
-            if os.path.exists(path):
-                os.remove(path)
+            return key, name, None, False
+        err = "empty recording"
+        for attempt in range(4):
+            try:
+                data = engine.mp3(text, slow)
+                if data:
+                    with open(path, "wb") as f:
+                        f.write(data)
+                    return key, name, None, True
+            except Exception as e:  # network hiccups and rate limits: wait and retry
+                err = str(e)[:200]
+            time.sleep(3 * 2 ** attempt)
+        return key, None, err, False
 
-    await asyncio.gather(*(one(k, *v) for k, v in jobs.items()))
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(one, jobs.items()))
+    index = {key: name for key, name, _, _ in results if name}
+    failed = [f"{key}: {err}" for key, name, err, _ in results if not name]
+    made = sum(1 for *_, new in results if new)
 
     # Drop clips for phrases that are no longer used
     keep = set(index.values())
@@ -153,16 +106,16 @@ async def main():
         if f.endswith(".mp3") and f not in keep:
             os.remove(os.path.join(OUT, f))
     with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False, indent=0, sort_keys=True)
+        json.dump({**index, "__voice": engine.label}, f, ensure_ascii=False, indent=0, sort_keys=True)
 
-    print(f"{len(index)} of {len(jobs)} phrases have a clip ({made} recorded now, voice {voice}).")
+    print(f"{len(index)} of {len(jobs)} phrases have a clip ({made} recorded now, voice {engine.label}).")
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-            f.write(f"clips={len(index)} of {len(jobs)}\nvoice={voice}\n")
+            f.write(f"clips={len(index)} of {len(jobs)}\nvoice={engine.label}\n")
     for line in failed:
-        print("  not recorded:", line)
+        print("::warning::Not recorded:", line)
     return 0 if index else 1
 
 
 if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
+    sys.exit(main())

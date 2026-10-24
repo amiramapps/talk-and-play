@@ -107,13 +107,20 @@ next clue; after the last clue, three picture choices appear.
 - Phone voices read Hebrew badly, so **every phrase the app says is pre-recorded**
   in the publish workflow (`tools/make_audio.py`), with recordings cached between
   runs. Dictation words are also recorded at a slow speed.
-- **The owner asked for Google's voice.** When the repository secret
-  `GOOGLE_TTS_KEY` (a Google Cloud Text-to-Speech API key) is set, clips are
-  recorded with Google's Hebrew WaveNet voice, `he-IL-Wavenet-A` by default. The
-  repository variable `GOOGLE_TTS_VOICE` picks another voice: `he-IL-Wavenet-B`,
-  `-C` or `-D` (B and D are male). Without a key, or if Google refuses it, the
-  recorder uses Microsoft's `he-IL-HilaNeural` through edge-tts and the run shows a
-  warning. The "Voice clips" step name shows which voice was used.
+- **The owner asked for Google's best voice, Gemini if possible.** With the
+  repository secret `GOOGLE_TTS_KEY`, `tools/tts_engines.py` tries the voices best
+  first and records with the first one the key unlocks: Gemini (`gemini-2.5-pro-tts`,
+  then `gemini-2.5-flash-tts`) in Google Cloud Text-to-Speech, a Gemini TTS model
+  through the Gemini API, Chirp 3 HD, then WaveNet. Without a key, or if Google
+  refuses them all, it uses Microsoft's `he-IL-HilaNeural` through edge-tts. Each
+  refused voice is reported as a warning in the publish run, and the "Voice clips"
+  step name shows the voice used. The repository variable `GOOGLE_TTS_VOICE` forces
+  one Google Cloud voice by name.
+- **Sound on iPhones:** browsers allow sound only after a tap, and iPhones count
+  the finger lifting (`touchend`, `click`), not touching down. `js/core.js` switches
+  the sound on for all of these and plays a silent sound inside the tap. The home
+  screen shows parents which voice actually played ("קול: הקלטה (...)" or "קול: הקול
+  של הטלפון").
 - The phone's own Hebrew voice is only a fallback for a phrase without a recording.
 - **Every phrase the app speaks must live in `js/content.js`** (`P`, `NUMS`,
   `PRAISE`, `LETTER_NAMES`, `ANIMALS`) so it gets recorded. Build sentences from
@@ -135,6 +142,7 @@ next clue; after the last clue, three picture choices appear.
 | `js/spelling.js` | Spelling by letter names, letter pad |
 | `js/animals.js` | Guess the animal |
 | `tools/make_audio.py` | Records the voice clips (runs in the publish workflow) |
+| `tools/tts_engines.py` | The voices it can record with, best first |
 
 The scripts are plain files that share one global scope and load in the order
 listed at the bottom of `app.html`. Code that runs while the page loads may only
