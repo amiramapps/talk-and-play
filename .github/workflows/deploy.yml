@@ -51,6 +51,16 @@ jobs:
           path: audio
           key: voice-${{ github.run_id }}
 
+      # Project rule: no file over 300 lines (see CLAUDE.md). Reported here, never blocks publishing.
+      - name: Check file lengths
+        id: lines
+        run: |
+          longest=$(git ls-files | xargs wc -l | grep -v ' total$' | sort -n | tail -1)
+          echo "longest=$(echo $longest | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          git ls-files | xargs wc -l | grep -v ' total$' | awk '$1 > 300 {print "::warning::" $2 " has " $1 " lines (limit 300)"}'
+      - name: "Longest file: ${{ steps.lines.outputs.longest }} lines"
+        run: "true"
+
       - name: Build the site
         run: |
           sh build.sh
