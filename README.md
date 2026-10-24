@@ -1,12 +1,12 @@
-# Talk & Play
+# מדברים ומשחקים (Talk & Play)
 
-A talking game for kids, played on a phone:
+A talking game for kids in Hebrew, played on a phone:
 
 - **Write words**: hear a word spelled out, then trace it with a finger.
 - **Guess the animal**: listen to clues and say (or tap) the answer.
 
-Kids can tap the red mic and say things like "write words", "guess the animal",
-"teach me how to write dog", "next", "again", "hint" or "home".
+Kids tap the red mic and speak Hebrew: "כתיבה", "חיות", "איך כותבים כלב",
+"הבא", "שוב", "רמז" or "הביתה".
 
 ## Changing the app
 

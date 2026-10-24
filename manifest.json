@@ -1,9 +1,17 @@
 {
-  "name": "Talk & Play",
-  "short_name": "Talk & Play",
+  "name": "מדברים ומשחקים",
+  "short_name": "מדברים ומשחקים",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FFF9EC",
   "theme_color": "#D7385F",
-  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "lang": "he",
+  "dir": "rtl"
 }

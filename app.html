@@ -1,10 +1,10 @@
-<title>Talk &amp; Play</title>
+<title>מדברים ומשחקים</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Rubik:wght@500&family=Varela+Round&display=swap">
 <style>
-/* Layout: one-screen sticker-book app. Header bar, one big play card, giant mic button anchored at the bottom. */
+/* Layout: one-screen sticker-book app, right to left. Header bar, one big play card, giant mic button anchored at the bottom. */
 :root {
   --paper: #FFF9EC;
   --card: #FFFFFF;
@@ -16,8 +16,9 @@
   --line: #EADFC6;
   --guide: #CBD5EC;
   --on-accent: #FFFFFF;
-  --display: "Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
-  --body: "Andika", "Trebuchet MS", system-ui, sans-serif;
+  --display: "Fredoka", "Varela Round", "Arial Hebrew", system-ui, sans-serif;
+  --body: "Varela Round", "Arial Hebrew", "Trebuchet MS", system-ui, sans-serif;
+  --letters: "Rubik", "Arial Hebrew", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -35,7 +36,7 @@
 html, body { height: 100%; }
 body {
   background: var(--paper); color: var(--ink);
-  font-family: var(--body); font-size: 18px; line-height: 1.4;
+  font-family: var(--body); font-size: 18px; line-height: 1.45;
   -webkit-tap-highlight-color: transparent;
 }
 .app {
@@ -50,42 +51,42 @@ button:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
 
 /* Header */
 .top { display: flex; align-items: center; gap: 12px; }
-.top h1 { font-family: var(--display); font-weight: 800; font-size: 1.6rem; margin: 0; flex: 1; line-height: 1; }
+.top h1 { font-family: var(--display); font-weight: 700; font-size: 1.55rem; margin: 0; flex: 1; line-height: 1.1; }
 .icon-btn {
   width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--line);
   background: var(--card); font-size: 1.4rem; display: grid; place-items: center;
 }
 .stars {
-  font-family: var(--display); font-weight: 800; font-size: 1.25rem;
+  font-family: var(--display); font-weight: 700; font-size: 1.25rem;
   background: var(--card); border: 2px solid var(--line); border-radius: 999px;
   padding: 4px 14px; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .stars.pop { animation: pop .5s ease; }
-@keyframes pop { 40% { transform: scale(1.35) rotate(-6deg); } }
+@keyframes pop { 40% { transform: scale(1.35) rotate(6deg); } }
 
 /* Screens */
 main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
 .screen { display: flex; flex-direction: column; gap: 14px; flex: 1; }
-.hello { font-family: var(--display); font-size: 1.9rem; font-weight: 800; margin: 8px 0 0; line-height: 1.1; text-wrap: balance; }
+.hello { font-family: var(--display); font-size: 1.9rem; font-weight: 700; margin: 8px 0 0; line-height: 1.15; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; }
 
 .tiles { display: grid; gap: 14px; }
 .tile {
   display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 16px;
-  text-align: left; border: 0; border-radius: 28px; padding: 20px;
+  text-align: start; border: 0; border-radius: 28px; padding: 20px;
   box-shadow: 0 6px 0 rgba(0,0,0,.14);
 }
 .tile:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.14); }
 .tile .pic { font-size: 3.4rem; line-height: 1; }
-.tile strong { display: block; font-family: var(--display); font-size: 1.6rem; line-height: 1.1; }
-.tile span { font-size: .95rem; opacity: .9; }
+.tile strong { display: block; font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.15; }
+.tile span { font-size: .95rem; opacity: .92; }
 .tile.write { background: var(--sea); color: var(--on-accent); }
 .tile.guess { background: var(--sun); color: #2A1E00; }
 
 .say-list { margin: 0; padding: 14px 16px; list-style: none; display: grid; gap: 6px;
   background: var(--card); border: 2px dashed var(--line); border-radius: 18px; font-size: .95rem; }
-.say-list b { font-family: var(--display); }
-.label { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.say-list b { font-family: var(--display); font-weight: 600; }
+.label { font-size: .8rem; color: var(--muted); font-weight: 700; }
 
 .card { background: var(--card); border: 2px solid var(--line); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -94,7 +95,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .word-pic { font-size: 3.2rem; line-height: 1; }
 .letters { display: flex; flex-wrap: wrap; gap: 6px; }
 .letters span {
-  font-family: var(--body); font-weight: 700; font-size: 2rem; min-width: 44px; text-align: center;
+  font-family: var(--letters); font-weight: 500; font-size: 2rem; min-width: 44px; text-align: center;
   padding: 0 6px; border-radius: 12px; background: var(--paper); border: 2px solid var(--line);
   transition: transform .15s, background .15s;
 }
@@ -108,7 +109,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   background: var(--card); font-family: var(--display); font-weight: 600; font-size: 1.1rem; padding: 6px 14px;
 }
 .btn.main { background: var(--sea); border-color: var(--sea); color: var(--on-accent); }
-.feedback { min-height: 1.4em; margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.15rem; text-align: center; }
+.feedback { min-height: 1.45em; margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.15rem; text-align: center; }
 .feedback.good { color: var(--sea); }
 .feedback.try { color: var(--berry); }
 
@@ -116,7 +117,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .mystery {
   align-self: center; width: 150px; height: 150px; border-radius: 50%;
   background: var(--paper); border: 4px dashed var(--sun);
-  display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 5rem; line-height: 1;
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 5rem; line-height: 1;
 }
 .mystery.found { border-style: solid; border-color: var(--sea); animation: pop .6s ease; }
 .clue { font-size: 1.3rem; text-align: center; margin: 0; text-wrap: balance; }
@@ -138,41 +139,41 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .mic.listening { animation: pulse 1.1s ease-in-out infinite; background: var(--sea); }
 .mic.off { opacity: .55; }
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sea) 60%, transparent); } 50% { box-shadow: 0 0 0 18px transparent; } }
-.status { margin: 0; color: var(--muted); font-size: .95rem; text-align: center; min-height: 1.4em; text-wrap: balance; }
+.status { margin: 0; color: var(--muted); font-size: .95rem; text-align: center; min-height: 1.45em; text-wrap: balance; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 </style>
 
-<div class="app">
+<div class="app" dir="rtl" lang="he">
   <header class="top">
-    <button class="icon-btn" id="homeBtn" aria-label="Home">🏠</button>
-    <h1>Talk &amp; Play</h1>
-    <div class="stars" id="stars" aria-label="Stars earned">⭐ 0</div>
+    <button class="icon-btn" id="homeBtn" aria-label="מסך ראשי">🏠</button>
+    <h1>מדברים ומשחקים</h1>
+    <div class="stars" id="stars" aria-label="כוכבים שהרווחתם">⭐ 0</div>
   </header>
 
   <main>
     <!-- Home -->
     <section class="screen" id="home">
-      <p class="hello">Hi! What do you want to play?</p>
-      <p class="sub">Tap a game, or tap the red mic and say it.</p>
+      <p class="hello">שלום! במה נשחק?</p>
+      <p class="sub">לוחצים על משחק, או לוחצים על המיקרופון האדום ואומרים את השם שלו.</p>
       <div class="tiles">
         <button class="tile write" id="goWrite">
           <span class="pic">✏️</span>
-          <span><strong>Write words</strong><span>Say “write words”</span></span>
+          <span><strong>כותבים מילים</strong><span>אומרים: ״כתיבה״</span></span>
         </button>
         <button class="tile guess" id="goGuess">
           <span class="pic">🦁</span>
-          <span><strong>Guess the animal</strong><span>Say “guess the animal”</span></span>
+          <span><strong>מנחשים חיות</strong><span>אומרים: ״חיות״</span></span>
         </button>
       </div>
       <ul class="say-list">
-        <li class="label">Things you can say</li>
-        <li><b>“Teach me how to write dog”</b>: learn any word</li>
-        <li><b>“Again”</b> or <b>“Next”</b>: hear it again or move on</li>
-        <li><b>“Hint”</b>: get another animal clue</li>
-        <li><b>“Home”</b>: come back here</li>
+        <li class="label">מה אפשר להגיד</li>
+        <li><b>״איך כותבים כלב?״</b> ללמוד לכתוב כל מילה</li>
+        <li><b>״שוב״</b> או <b>״הבא״</b> לשמוע שוב או להמשיך</li>
+        <li><b>״רמז״</b> לשמוע עוד רמז על החיה</li>
+        <li><b>״הביתה״</b> לחזור לכאן</li>
       </ul>
     </section>
 
@@ -185,16 +186,16 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
         </div>
         <div class="trace" id="trace">
           <canvas id="guideCv"></canvas>
-          <canvas id="inkCv" aria-label="Trace the letters with your finger"></canvas>
+          <canvas id="inkCv" aria-label="מעבירים את האצבע על האותיות"></canvas>
         </div>
         <p class="feedback" id="writeFb"></p>
         <div class="row">
-          <button class="btn" id="spellBtn">🔊 Spell it</button>
-          <button class="btn" id="clearBtn">🧽 Clear</button>
+          <button class="btn" id="spellBtn">🔊 איות</button>
+          <button class="btn" id="clearBtn">🧽 מחיקה</button>
         </div>
         <div class="row">
-          <button class="btn main" id="doneBtn">I'm done!</button>
-          <button class="btn" id="nextWordBtn">Next word ➜</button>
+          <button class="btn main" id="doneBtn">סיימתי!</button>
+          <button class="btn" id="nextWordBtn">מילה הבאה ←</button>
         </div>
       </div>
     </section>
@@ -208,19 +209,19 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
         <p class="feedback" id="guessFb"></p>
         <div class="choices" id="choices" hidden></div>
         <div class="row">
-          <button class="btn" id="hearBtn">🔊 Hear clue</button>
-          <button class="btn" id="hintBtn">💡 Hint</button>
-          <button class="btn main" id="nextAnimalBtn">New animal ➜</button>
+          <button class="btn" id="hearBtn">🔊 שוב</button>
+          <button class="btn" id="hintBtn">💡 רמז</button>
+          <button class="btn main" id="nextAnimalBtn">חיה חדשה ←</button>
         </div>
       </div>
     </section>
   </main>
 
   <div class="dock">
-    <button class="mic" id="mic" aria-label="Tap and talk">
+    <button class="mic" id="mic" aria-label="לוחצים ומדברים">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>
     </button>
-    <p class="status" id="status" aria-live="polite">Tap the mic and talk</p>
+    <p class="status" id="status" aria-live="polite">לוחצים על המיקרופון ומדברים</p>
   </div>
 </div>
 
@@ -228,33 +229,53 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 (() => {
   const $ = id => document.getElementById(id);
   let current = "home";
+  const LANG = "he-IL";
 
   // ---------- Content ----------
+  // [word as written, word with niqqud for the voice, picture]
   const WORDS = [
-    ["cat","🐱"],["dog","🐶"],["sun","☀️"],["fish","🐟"],["star","⭐"],["tree","🌳"],
-    ["ball","⚽"],["moon","🌙"],["book","📖"],["frog","🐸"],["cake","🎂"],["apple","🍎"],
-    ["mom","👩"],["dad","👨"],["love","❤️"],["car","🚗"],["hat","🎩"],["bus","🚌"]
+    ["חתול","חָתוּל","🐱"],["כלב","כֶּלֶב","🐶"],["שמש","שֶׁמֶשׁ","☀️"],["דג","דָּג","🐟"],
+    ["כוכב","כּוֹכָב","⭐"],["עץ","עֵץ","🌳"],["כדור","כַּדּוּר","⚽"],["ירח","יָרֵחַ","🌙"],
+    ["ספר","סֵפֶר","📖"],["עוגה","עוּגָה","🎂"],["תפוח","תַּפּוּחַ","🍎"],["אמא","אִמָּא","👩"],
+    ["אבא","אַבָּא","👨"],["לב","לֵב","❤️"],["בית","בַּיִת","🏠"],["פרח","פֶּרַח","🌸"],
+    ["ים","יָם","🌊"],["גשם","גֶּשֶׁם","🌧️"],["בננה","בָּנָנָה","🍌"],["גלידה","גְּלִידָה","🍦"]
   ];
+  // How the voice says each letter's name
+  const LETTER_NAMES = {
+    "א":"אָלֶף","ב":"בֵּית","ג":"גִּימֶל","ד":"דָּלֶת","ה":"הֵא","ו":"וָו","ז":"זַיִן","ח":"חֵית",
+    "ט":"טֵית","י":"יוּד","כ":"כַּף","ך":"כַּף סוֹפִית","ל":"לָמֶד","מ":"מֵם","ם":"מֵם סוֹפִית",
+    "נ":"נוּן","ן":"נוּן סוֹפִית","ס":"סָמֶךְ","ע":"עַיִן","פ":"פֵּא","ף":"פֵּא סוֹפִית","צ":"צָדִי",
+    "ץ":"צָדִי סוֹפִית","ק":"קוֹף","ר":"רֵישׁ","ש":"שִׁין","ת":"תָּו"
+  };
+  // alt: the words that count as a right answer (written without niqqud or apostrophes)
   const ANIMALS = [
-    { name: "lion", e: "🦁", alt: ["lion","lions"], clues: ["I am a big cat with a fluffy mane.", "People call me the king of the jungle.", "I say ROAR!"] },
-    { name: "elephant", e: "🐘", alt: ["elephant"], clues: ["I am very, very big and gray.", "I have big floppy ears.", "I have a long trunk for a nose."] },
-    { name: "giraffe", e: "🦒", alt: ["giraffe"], clues: ["I am the tallest animal in the world.", "I have brown spots all over me.", "My long neck helps me eat leaves from tall trees."] },
-    { name: "monkey", e: "🐒", alt: ["monkey","chimp","chimpanzee","ape"], clues: ["I love to climb and swing in trees.", "I have a long tail and clever hands.", "Bananas are my favorite food!"] },
-    { name: "penguin", e: "🐧", alt: ["penguin"], clues: ["I am a bird, but I cannot fly.", "I live where it is icy and cold.", "I waddle on the ice in my black and white suit."] },
-    { name: "frog", e: "🐸", alt: ["frog","froggy","toad"], clues: ["I can jump really far.", "When I was a baby I was a tadpole.", "I am green and I say ribbit!"] },
-    { name: "cow", e: "🐄", alt: ["cow","cows"], clues: ["I live on a farm.", "I eat grass all day long.", "I give milk and I say moo!"] },
-    { name: "dog", e: "🐶", alt: ["dog","doggy","doggie","puppy"], clues: ["I am a pet who loves to play fetch.", "I wag my tail when I'm happy.", "I say woof woof!"] },
-    { name: "cat", e: "🐱", alt: ["cat","kitty","kitten"], clues: ["I am a pet with soft fur and whiskers.", "I love chasing balls of yarn.", "I say meow!"] },
-    { name: "owl", e: "🦉", alt: ["owl","owls","howl"], clues: ["I am a bird who stays awake all night.", "I have big round eyes.", "I say hoo, hoo!"] },
-    { name: "snake", e: "🐍", alt: ["snake"], clues: ["I have no legs, but I can move fast.", "My skin is covered in scales.", "I say hissss!"] },
-    { name: "rabbit", e: "🐰", alt: ["rabbit","bunny","bunnies"], clues: ["I have very long ears.", "I hop around and love carrots.", "I have a little fluffy tail."] },
-    { name: "turtle", e: "🐢", alt: ["turtle","tortoise"], clues: ["I move very, very slowly.", "I carry my house on my back.", "When I get scared I hide in my shell."] },
-    { name: "zebra", e: "🦓", alt: ["zebra"], clues: ["I look a lot like a horse.", "I live on the grassy plains of Africa.", "I have black and white stripes."] },
-    { name: "pig", e: "🐷", alt: ["pig","piggy","piglet"], clues: ["I live on a farm and love to roll in mud.", "I am pink and have a curly tail.", "I say oink oink!"] }
+    { name: "אריה", e: "🦁", alt: ["אריה","אריות","לביא"], clues: ["אני חתול גדול עם רעמה מפוארת.", "קוראים לי מלך החיות.", "אני שואג: גררררר!"] },
+    { name: "פיל", e: "🐘", alt: ["פיל","פילים","פילון"], clues: ["אני ענק ואפור.", "יש לי אוזניים גדולות שמתנפנפות.", "יש לי חדק ארוך במקום אף."] },
+    { name: "ג׳ירפה", e: "🦒", alt: ["גירפה","גרפה","גירפות"], clues: ["אני החיה הכי גבוהה בעולם.", "יש לי כתמים חומים על כל הגוף.", "הצוואר הארוך שלי עוזר לי לאכול עלים מהעצים."] },
+    { name: "קוף", e: "🐒", alt: ["קוף","קופיף","קופים","שימפנזה"], clues: ["אני אוהב לטפס ולהתנדנד על עצים.", "יש לי זנב ארוך וידיים זריזות.", "המאכל הכי אהוב עליי הוא בננה!"] },
+    { name: "פינגווין", e: "🐧", alt: ["פינגווין","פינגוין","פינגווינים"], clues: ["אני ציפור, אבל אני לא יכול לעוף.", "אני גר במקום קר מאוד עם הרבה קרח.", "אני הולך ומתנדנד בחליפה שחורה ולבנה."] },
+    { name: "צפרדע", e: "🐸", alt: ["צפרדע","צפרדעים","קרפדה"], clues: ["אני יכולה לקפוץ ממש רחוק.", "כשהייתי קטנה הייתי ראשן שוחה במים.", "אני ירוקה ואני עושה: קְוָוה קְוָוה!"] },
+    { name: "פרה", e: "🐄", alt: ["פרה","פרות"], clues: ["אני גרה ברפת.", "אני אוכלת עשב כל היום.", "אני נותנת חלב ואני עושה: מוּוּוּ!"] },
+    { name: "כלב", e: "🐶", alt: ["כלב","כלבלב","כלבה","כלבים"], clues: ["אני חיית מחמד שאוהבת להביא כדור.", "אני מכשכש בזנב כשאני שמח.", "אני עושה: הַב הַב!"] },
+    { name: "חתול", e: "🐱", alt: ["חתול","חתולה","חתלתול","חתולים"], clues: ["אני חיית מחמד עם פרווה רכה ושפם.", "אני אוהב לרדוף אחרי כדור צמר.", "אני עושה: מְיָאוּ!"] },
+    { name: "ינשוף", e: "🦉", alt: ["ינשוף","ינשופים"], clues: ["אני ציפור שערה כל הלילה.", "יש לי עיניים גדולות ועגולות.", "אני עושה: הוּ, הוּ!"] },
+    { name: "נחש", e: "🐍", alt: ["נחש","נחשים"], clues: ["אין לי רגליים, אבל אני זז מהר.", "העור שלי מכוסה בקשקשים.", "אני עושה: ססססס!"] },
+    { name: "ארנב", e: "🐰", alt: ["ארנב","ארנבת","ארנבון","ארנבים","שפן"], clues: ["יש לי אוזניים ארוכות מאוד.", "אני קופץ ואוהב לאכול גזר.", "יש לי זנב קטן ופרוותי."] },
+    { name: "צב", e: "🐢", alt: ["צב","צבים"], clues: ["אני זז לאט, לאט מאוד.", "אני סוחב את הבית שלי על הגב.", "כשאני מפחד אני מתחבא בתוך השריון."] },
+    { name: "זברה", e: "🦓", alt: ["זברה","זברות"], clues: ["אני דומה מאוד לסוס.", "אני גרה במישורים של אפריקה.", "יש לי פסים שחורים ולבנים."] },
+    { name: "חזיר", e: "🐷", alt: ["חזיר","חזירון","חזירים"], clues: ["אני גר בחווה ואוהב להתפלש בבוץ.", "אני ורוד ויש לי זנב מסולסל.", "אני עושה: אוֹינְק אוֹינְק!"] }
   ];
-  const PRAISE = ["Great job!", "Wow, you did it!", "Super star!", "Amazing!", "You're so smart!"];
+  const PRAISE = ["כל הכבוד!", "מעולה!", "יופי!", "אלופים!", "וואו, איזה יופי!"];
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+
+  // Hebrew text helpers: drop niqqud, apostrophes and punctuation so speech results compare cleanly
+  const clean = t => t.replace(/[֑-ׇ'"׳״`]/g, "").replace(/[.,!?;:־-]/g, " ").replace(/\s+/g, " ").trim();
+  // A spoken word matches a name with or without a one-letter prefix (הכלב, וכלב, זה כלב)
+  const PREFIXES = "הובלכמש";
+  const wordMatches = (w, n) => w === n || (w.length === n.length + 1 && PREFIXES.includes(w[0]) && w.slice(1) === n);
+  const saidAny = (alts, names) => alts.some(a => a.split(" ").some(w => names.some(n => wordMatches(w, n))));
+  const saysPhrase = (alts, phrases) => alts.some(a => phrases.some(p => a.includes(p)));
 
   // ---------- Stars ----------
   let stars = 0;
@@ -272,10 +293,17 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   const canSpeak = "speechSynthesis" in window;
   let voice = null;
   function pickVoice() {
-    const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
-    voice = vs.find(v => /samantha|google us english|aria|jenny|female/i.test(v.name)) || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
+    const vs = speechSynthesis.getVoices().filter(v => /^(he|iw)/i.test(v.lang));
+    voice = vs.find(v => /google|carmit|hila|avri/i.test(v.name)) || vs[0] || null;
   }
-  if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  if (canSpeak) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+    setTimeout(() => {
+      if (!voice && speechSynthesis.getVoices().length && !voiceBlocked)
+        setStatus("בטלפון הזה עוד אין קול בעברית. אפשר להוסיף אותו בהגדרות הטלפון, תחת ״הקראה״ או ״טקסט לדיבור״.");
+    }, 2000);
+  }
 
   let speakToken = 0;
   function say(text, rate = 0.9) {
@@ -285,13 +313,13 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       if (voice) u.voice = voice;
-      u.lang = voice ? voice.lang : "en-US";
-      u.rate = rate; u.pitch = 1.15;
+      u.lang = voice ? voice.lang : LANG;
+      u.rate = rate; u.pitch = 1.1;
       let done = false;
       const finish = () => { if (!done) { done = true; resolve(token === speakToken); } };
       u.onend = finish; u.onerror = finish;
       speechSynthesis.speak(u);
-      setTimeout(finish, 1500 + text.length * 110); // some phones never fire onend
+      setTimeout(finish, 1500 + text.length * 120); // some phones never fire onend
     });
   }
   const hush = () => { speakToken++; if (canSpeak) speechSynthesis.cancel(); };
@@ -301,7 +329,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   let rec = null, listening = false, voiceBlocked = !SR;
   const mic = $("mic"), statusEl = $("status");
   const setStatus = t => { statusEl.textContent = t; };
-  if (voiceBlocked) markNoVoice("This browser can't listen. Tap the buttons, or open the app in Chrome or Safari.");
+  if (voiceBlocked) markNoVoice("הדפדפן הזה לא יכול להקשיב. לוחצים על הכפתורים, או פותחים את האפליקציה ב-Chrome או ב-Safari.");
 
   function markNoVoice(msg) {
     voiceBlocked = true;
@@ -314,11 +342,11 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     return new Promise((resolve, reject) => {
       hush();
       rec = new SR();
-      rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 5;
+      rec.lang = LANG; rec.interimResults = false; rec.maxAlternatives = 5;
       let got = false;
       rec.onresult = e => {
         got = true;
-        resolve(Array.from(e.results[0]).map(a => a.transcript.toLowerCase().trim()));
+        resolve(Array.from(e.results[0]).map(a => clean(a.transcript)).filter(Boolean));
       };
       rec.onerror = e => { if (!got) reject(e.error); };
       rec.onend = () => { setListening(false); if (!got) resolve([]); };
@@ -329,47 +357,48 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   function setListening(on) {
     listening = on;
     mic.classList.toggle("listening", on);
-    if (on) setStatus("I'm listening…");
+    if (on) setStatus("מקשיבים…");
   }
 
   mic.addEventListener("click", async () => {
-    if (voiceBlocked) {
-      say("Tap the big buttons to play!");
-      return;
-    }
+    if (voiceBlocked) { say("לוחצים על הכפתורים הגדולים כדי לשחק!"); return; }
     if (listening) { rec && rec.stop(); return; }
     try {
       const heard = await listen();
-      if (!heard.length) { setStatus("I didn't hear anything. Tap and try again!"); return; }
-      setStatus("You said: “" + heard[0] + "”");
+      if (!heard.length) { setStatus("לא שמעתי כלום. לוחצים ומנסים שוב!"); return; }
+      setStatus("שמעתי: ״" + heard[0] + "״");
       handle(heard);
     } catch (err) {
       if (err === "not-allowed" || err === "service-not-allowed" || err === "audio-capture") {
-        markNoVoice("The microphone is off here. Tap the buttons instead, or open the app on its own web page.");
+        markNoVoice("המיקרופון כבוי כאן. לוחצים על הכפתורים, או פותחים את האפליקציה בדף משלה.");
       } else if (err === "no-speech") {
-        setStatus("I didn't hear anything. Tap and try again!");
+        setStatus("לא שמעתי כלום. לוחצים ומנסים שוב!");
+      } else if (err === "language-not-supported") {
+        markNoVoice("הטלפון הזה לא מזהה דיבור בעברית. לוחצים על הכפתורים במקום.");
       } else {
-        setStatus("Oops, I couldn't listen. Tap the mic to try again.");
+        setStatus("אופס, לא הצלחתי להקשיב. לוחצים על המיקרופון ומנסים שוב.");
       }
     }
   });
 
   // ---------- Commands ----------
-  const has = (alts, re) => alts.some(a => re.test(a));
-  const SKIP_WORDS = new Set(["words","word","some","me","it","a","the","how","to","more","something"]);
+  const SKIP_WORDS = new Set(["מילים","מילה","משהו","עוד","לי","אותי","את","אותה","אותו","זה"]);
+  const HOME = ["הביתה","תפריט","מסך ראשי","להתחלה","עצור"];
+  const WANT_GUESS = ["חיה","חיות","לנחש","ניחוש","חידה","חידות"];
+  const WANT_WRITE = ["כתיב","לכתוב","כותבים","מילים","מילה","אותיות","לאיית"];
 
   function handle(alts) {
-    // "teach me how to write dog", "how do you spell cake", "write moon"
+    // "איך כותבים כלב", "תלמד אותי לכתוב שמש", "לכתוב את המילה ים"
     for (const a of alts) {
-      const m = a.match(/(?:write|spell|spelled)(?: the word)? ([a-z]+)/);
+      const m = a.match(/(?:לכתוב|כותבים|כותב|כותבת|לאיית|מאייתים)(?: את)?(?: המילה)? ([א-ת]+)/);
       if (m && !SKIP_WORDS.has(m[1])) { startWrite(m[1]); return; }
     }
-    if (has(alts, /\b(home|menu|go back|stop|quit)\b/)) { goHome(); return; }
-    if (current !== "guess" && has(alts, /animal|guess|riddle/)) { startGuess(); return; }
-    if (current !== "write" && has(alts, /writ|word|spell|letter/)) { startWrite(); return; }
+    if (saysPhrase(alts, HOME)) { goHome(); return; }
+    if (current !== "guess" && saysPhrase(alts, WANT_GUESS)) { startGuess(); return; }
+    if (current !== "write" && saysPhrase(alts, WANT_WRITE)) { startWrite(); return; }
     if (current === "write") return handleWrite(alts);
     if (current === "guess") return handleGuess(alts);
-    say("You can say write words, or guess the animal.");
+    say("אפשר להגיד: כתיבה, או חיות.");
   }
 
   // ---------- Screens ----------
@@ -379,15 +408,15 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   }
   function goHome() {
     hush(); show("home");
-    if (!voiceBlocked) setStatus("Tap the mic and talk");
-    say("What do you want to play?");
+    if (!voiceBlocked) setStatus("לוחצים על המיקרופון ומדברים");
+    say("במה נשחק?");
   }
   $("homeBtn").onclick = goHome;
   $("goWrite").onclick = () => startWrite();
   $("goGuess").onclick = () => startGuess();
 
   // ---------- Writing game ----------
-  let word = "", wordIdx = -1, drawn = 0, earnedWord = false;
+  let word = "", spoken = "", wordIdx = -1, drawn = 0, earnedWord = false;
   const guideCv = $("guideCv"), inkCv = $("inkCv"), trace = $("trace");
   const gctx = guideCv.getContext("2d"), ictx = inkCv.getContext("2d");
   const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -395,11 +424,14 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   function startWrite(custom) {
     show("write");
     if (custom) {
-      const found = WORDS.find(w => w[0] === custom);
-      word = custom; $("wordPic").textContent = found ? found[1] : "✏️";
+      // Accept the word with a prefix too ("הכלב" → "כלב")
+      const found = WORDS.find(w => wordMatches(custom, w[0]));
+      word = found ? found[0] : custom;
+      spoken = found ? found[1] : custom;
+      $("wordPic").textContent = found ? found[2] : "✏️";
     } else {
       let i; do { i = Math.floor(Math.random() * WORDS.length); } while (i === wordIdx && WORDS.length > 1);
-      wordIdx = i; word = WORDS[i][0]; $("wordPic").textContent = WORDS[i][1];
+      wordIdx = i; [word, spoken] = WORDS[i]; $("wordPic").textContent = WORDS[i][2];
     }
     earnedWord = false;
     $("letters").innerHTML = "";
@@ -407,20 +439,21 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     setFb("writeFb", "");
     sizeCanvases();
     if (document.fonts) document.fonts.ready.then(() => { if (current === "write") { const r = trace.getBoundingClientRect(); drawGuide(r.width, r.height); } });
-    if (!voiceBlocked) setStatus("Say the word, or say “next”");
+    if (!voiceBlocked) setStatus("אומרים את המילה, או אומרים ״הבא״");
     spell(true);
   }
 
   async function spell(intro) {
     const spans = [...$("letters").children];
-    if (intro && !(await say("Let's write " + word + "!"))) return;
-    for (let i = 0; i < word.length; i++) {
+    const chars = [...word];
+    if (intro && !(await say("בואו נכתוב: " + spoken + "!"))) return;
+    for (let i = 0; i < chars.length; i++) {
       spans.forEach((s, j) => s.classList.toggle("on", j === i));
-      if (!(await say(word[i].toUpperCase() + ".", 0.8))) { spans.forEach(s => s.classList.remove("on")); return; }
+      if (!(await say(LETTER_NAMES[chars[i]] || chars[i], 0.8))) { spans.forEach(s => s.classList.remove("on")); return; }
     }
     spans.forEach(s => s.classList.remove("on"));
-    if (!(await say(word + "!"))) return;
-    if (intro) say("Now trace the letters with your finger.");
+    if (!(await say(spoken + "!"))) return;
+    if (intro) say("עכשיו מעבירים את האצבע על האותיות האפורות.");
   }
 
   function sizeCanvases() {
@@ -436,22 +469,22 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 
   function drawGuide(w, h) {
     gctx.clearRect(0, 0, w, h);
-    // School handwriting paper: top line, dashed middle line, baseline
-    const top = h * 0.18, base = h * 0.78, mid = (top + base) / 2;
+    // Writing lines: letters sit between the top line and the baseline; ק and final letters drop below it
+    const top = h * 0.2, base = h * 0.7;
     gctx.lineWidth = 2;
     gctx.strokeStyle = css("--muted");
     gctx.globalAlpha = 0.5;
     gctx.setLineDash([]);
     [top, base].forEach(y => { gctx.beginPath(); gctx.moveTo(12, y); gctx.lineTo(w - 12, y); gctx.stroke(); });
-    gctx.setLineDash([10, 10]);
-    gctx.beginPath(); gctx.moveTo(12, mid); gctx.lineTo(w - 12, mid); gctx.stroke();
     gctx.globalAlpha = 1;
 
-    let size = (base - top) * 1.45;
-    gctx.font = `700 ${size}px Andika, "Trebuchet MS", sans-serif`;
+    const font = s => `500 ${s}px Rubik, "Arial Hebrew", sans-serif`;
+    let size = (base - top) * 1.4;
+    gctx.font = font(size);
     const measured = gctx.measureText(word).width;
     if (measured > w * 0.88) size *= (w * 0.88) / measured;
-    gctx.font = `700 ${size}px Andika, "Trebuchet MS", sans-serif`;
+    gctx.font = font(size);
+    gctx.direction = "rtl";
     gctx.textAlign = "center"; gctx.textBaseline = "alphabetic";
     gctx.fillStyle = css("--guide");
     gctx.fillText(word, w / 2, base);
@@ -488,25 +521,25 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
   }
 
   function wordDone() {
-    if (drawn < 60) { setFb("writeFb", "Trace the gray letters first!", "try"); say("Trace the gray letters with your finger first."); return; }
+    if (drawn < 60) { setFb("writeFb", "קודם מעבירים את האצבע על האותיות!", "try"); say("קודם מעבירים את האצבע על האותיות האפורות."); return; }
     const p = pick(PRAISE);
     setFb("writeFb", p + " ⭐", "good");
     if (!earnedWord) { earnedWord = true; addStar(); }
-    say(p + " You wrote " + word + "! Say next for a new word.");
+    say(p + " המילה " + spoken + " כתובה! אומרים הַבָּא למילה חדשה.");
   }
 
   function handleWrite(alts) {
-    if (has(alts, /\b(next|new|another|skip)\b/)) return startWrite();
-    if (has(alts, /\b(clear|erase|clean)\b/)) { clearInk(); return say("All clean. Try again!"); }
-    if (has(alts, /\b(done|finished|i did it)\b/)) return wordDone();
-    if (alts.some(a => a.split(/\s+/).includes(word))) {
-      setFb("writeFb", "You said " + word + "! ⭐", "good");
+    if (saysPhrase(alts, ["מחק", "ניקוי", "לנקות", "תנקה", "תנקי"])) { clearInk(); return say("הכול נקי. מנסים שוב!"); }
+    if (saysPhrase(alts, ["סיימתי", "גמרתי", "סיימנו"])) return wordDone();
+    if (saidAny(alts, [word])) {
+      setFb("writeFb", "נכון! " + word + " ⭐", "good");
       if (!earnedWord) { earnedWord = true; addStar(); }
-      return say("Yes! You said " + word + ". " + pick(PRAISE));
+      return say("נכון! " + spoken + ". " + pick(PRAISE));
     }
-    if (has(alts, /again|repeat|spell|letters|what/)) return spell(false);
-    setFb("writeFb", "Try saying “" + word + "”", "try");
-    say("Hmm. Can you say " + word + "?");
+    if (saysPhrase(alts, ["שוב", "עוד פעם", "חזור", "תחזור", "תחזרי", "איות", "לאיית", "אותיות"])) return spell(false);
+    if (saysPhrase(alts, ["הבא", "הבאה", "אחרת", "חדשה", "דלג", "עוד מילה"])) return startWrite();
+    setFb("writeFb", "מנסים להגיד: ״" + word + "״", "try");
+    say("הממ. אפשר להגיד " + spoken + "?");
   }
 
   $("spellBtn").onclick = () => spell(false);
@@ -527,8 +560,8 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     setFb("guessFb", "");
     renderClue();
     if (voiceBlocked) showChoices();
-    else setStatus("Tap the mic and say the animal");
-    say("Guess who I am! " + animal.clues[0]);
+    else setStatus("לוחצים על המיקרופון ואומרים את שם החיה");
+    say("נחשו מי אני! " + animal.clues[0]);
   }
 
   function renderClue() {
@@ -544,7 +577,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       const b = document.createElement("button");
       b.className = "choice";
       b.innerHTML = `<span class="e">${a.e}</span><span>${a.name}</span>`;
-      b.onclick = () => guess([a.name]);
+      b.onclick = () => guess([a.alt[0]]);
       $("choices").appendChild(b);
     }
     $("choices").hidden = false;
@@ -558,30 +591,28 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
       return say(animal.clues[clueAt]);
     }
     showChoices();
-    say("That was my last clue. Which one is it?");
+    say("זה היה הרמז האחרון. מי אני?");
   }
 
   function guess(alts) {
     if (solved) return;
-    const words = alts.join(" ").split(/\s+/);
-    if (animal.alt.some(n => words.includes(n))) {
+    if (saidAny(alts, animal.alt)) {
       solved = true;
       $("mystery").textContent = animal.e; $("mystery").classList.add("found");
       $("choices").hidden = true;
       addStar();
-      const p = pick(PRAISE);
-      setFb("guessFb", "Yes! It's a " + animal.name + "! ⭐", "good");
-      return say("Yes! I'm a " + animal.name + "! " + p + " Say next for a new animal.");
+      setFb("guessFb", "נכון! זה " + animal.name + "! ⭐", "good");
+      return say("נכון! אני " + animal.name + "! " + pick(PRAISE) + " אומרים הַבָּא לחיה חדשה.");
     }
-    const named = ANIMALS.find(a => a.alt.some(n => words.includes(n)));
-    setFb("guessFb", named ? "Not a " + named.name + ". Try again!" : "Not quite. Try again!", "try");
+    const named = ANIMALS.find(a => saidAny(alts, a.alt));
+    setFb("guessFb", named ? "זה לא " + named.name + ". מנסים שוב!" : "לא בדיוק. מנסים שוב!", "try");
     if (clueAt < animal.clues.length - 1) {
       clueAt++; renderClue();
       if (clueAt === animal.clues.length - 1) showChoices();
-      return say((named ? "I'm not a " + named.name + ". " : "Not quite! ") + "Here's another clue. " + animal.clues[clueAt]);
+      return say((named ? "אני לא " + named.name + ". " : "לא בדיוק! ") + "הנה עוד רמז: " + animal.clues[clueAt]);
     }
     showChoices();
-    say("Not quite! Look at the pictures. Which one am I?");
+    say("לא בדיוק! מסתכלים על התמונות. מי אני?");
   }
 
   function reveal() {
@@ -589,15 +620,15 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
     solved = true;
     $("mystery").textContent = animal.e; $("mystery").classList.add("found");
     $("choices").hidden = true;
-    setFb("guessFb", "It was a " + animal.name + "!", "good");
-    say("I was a " + animal.name + "! Let's try another one.");
+    setFb("guessFb", "זה היה " + animal.name + "!", "good");
+    say("הייתי " + animal.name + "! בואו ננסה עוד אחת.");
   }
 
   function handleGuess(alts) {
-    if (has(alts, /\b(next|new|another|skip)\b/)) return startGuess();
-    if (has(alts, /\b(hint|help|more|another clue)\b/)) return nextClue();
-    if (has(alts, /don'?t know|give up|tell me/)) return reveal();
-    if (has(alts, /\b(again|repeat|what)\b/)) return say(animal.clues[clueAt]);
+    if (saysPhrase(alts, ["לא יודע", "לא יודעת", "מוותר", "מוותרת", "תגיד", "תגידי"])) return reveal();
+    if (saysPhrase(alts, ["רמז", "עזרה", "תעזור", "תעזרי"])) return nextClue();
+    if (saysPhrase(alts, ["שוב", "עוד פעם", "חזור", "תחזור", "תחזרי"])) return say(animal.clues[clueAt]);
+    if (saysPhrase(alts, ["הבא", "הבאה", "חדשה", "אחרת", "דלג", "עוד חיה"])) return startGuess();
     guess(alts);
   }
 
