@@ -19,7 +19,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from tts_engines import pick_engines  # noqa: E402
+from tts_engines import GEMINI_KEY, pick_engines  # noqa: E402
+from check_audio import review  # noqa: E402
 
 OUT = "audio"
 
@@ -108,21 +109,33 @@ def main():
     failed = [f"{key}: {err}" for key, name, err, _ in results if not name]
     made = sum(1 for *_, new in results if new)
 
+    # Count phrases the best voice could not record, before the check swaps any clips
+    by_backup = sum(1 for name in index.values() if backup and name in {clip_name(backup, sl, t) for t, sl in jobs.values()})
+    if by_backup:
+        print(f"::warning::{by_backup} phrases were recorded with the backup voice {backup.label}; the next run tries {engine.label} again.")
+
+    # Gemini listens to each dictation word and keeps a version that is pronounced right
+    checked = right = 0
+    rejected = set()
+    if GEMINI_KEY:
+        words = [(text, key) for text, slow, key in dictation_phrases() if not slow and key == text]
+        checked, right, lines, rejected = review(index, words, backup, lambda *a: record(*a), OUT)
+        for line in lines:
+            print(" ".join(line.split()))
+
     # Drop clips for phrases that are no longer used
-    keep = set(index.values())
+    keep = set(index.values()) | rejected
     for f in os.listdir(OUT):
         if f.endswith(".mp3") and f not in keep:
             os.remove(os.path.join(OUT, f))
     with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
         json.dump({**index, "__voice": engine.label}, f, ensure_ascii=False, indent=0, sort_keys=True)
-    by_backup = sum(1 for name in index.values() if backup and name in {clip_name(backup, sl, t) for t, sl in jobs.values()})
-    if by_backup:
-        print(f"::warning::{by_backup} phrases were recorded with the backup voice {backup.label}; the next run tries {engine.label} again.")
 
     print(f"{len(index)} of {len(jobs)} phrases have a clip ({made} recorded now, voice {engine.label}).")
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"clips={len(index)} of {len(jobs)}\nvoice={engine.label}\n")
+            f.write(f"pronunciation={right} of {checked}\n")
     for line in failed:
         print("::warning::Not recorded:", line)
     return 0 if index else 1

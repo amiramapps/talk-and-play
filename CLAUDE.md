@@ -119,6 +119,14 @@ next clue; after the last clue, three picture choices appear.
   refused voice is reported as a warning in the publish run, and the "Voice clips"
   step name shows the voice used. The repository variable `GOOGLE_TTS_VOICE` forces
   one Google Cloud voice by name.
+- **The owner's biggest problem is words read with the wrong pronunciation**, more
+  than the sound of the voice. With a Gemini key, `tools/check_audio.py` has Gemini
+  listen to every dictation word after recording. A word that sounds wrong is tried
+  with the backup voice, and kept if that one sounds right. The rest are reported as
+  "Pronunciation of …" warnings in the publish run, with what was heard and what was
+  expected, and the step "Pronunciation check: N of M words sound right" sums it up.
+  Fix a reported word in `words.txt` (different niqqud, or a sentence after `|`).
+  Verdicts are cached in `audio/checks.json`, so each clip is judged once.
 - **Sound on iPhones:** browsers allow sound only after a tap, and iPhones count
   the finger lifting (`touchend`, `click`), not touching down. `js/core.js` switches
   the sound on for all of these and plays a silent sound inside the tap. The home
@@ -146,6 +154,7 @@ next clue; after the last clue, three picture choices appear.
 | `js/animals.js` | Guess the animal |
 | `tools/make_audio.py` | Records the voice clips (runs in the publish workflow) |
 | `tools/tts_engines.py` | The voices it can record with, best first |
+| `tools/check_audio.py` | Gemini listens to each word and checks its pronunciation |
 
 The scripts are plain files that share one global scope and load in the order
 listed at the bottom of `app.html`. Code that runs while the page loads may only
