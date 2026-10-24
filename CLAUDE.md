@@ -105,16 +105,21 @@ next clue; after the last clue, three picture choices appear.
 ## The voice
 
 - Phone voices read Hebrew badly, so **every phrase the app says is pre-recorded**
-  with Microsoft's neural Hebrew voice `he-IL-HilaNeural` (through edge-tts). This
-  happens in the publish workflow (`tools/make_audio.py`), with recordings cached
-  between runs. Dictation words are also recorded at a slow speed.
+  in the publish workflow (`tools/make_audio.py`), with recordings cached between
+  runs. Dictation words are also recorded at a slow speed.
+- **The owner asked for Google's voice.** When the repository secret
+  `GOOGLE_TTS_KEY` (a Google Cloud Text-to-Speech API key) is set, clips are
+  recorded with Google's Hebrew WaveNet voice, `he-IL-Wavenet-A` by default. The
+  repository variable `GOOGLE_TTS_VOICE` picks another voice: `he-IL-Wavenet-B`,
+  `-C` or `-D` (B and D are male). Without a key, or if Google refuses it, the
+  recorder uses Microsoft's `he-IL-HilaNeural` through edge-tts and the run shows a
+  warning. The "Voice clips" step name shows which voice was used.
 - The phone's own Hebrew voice is only a fallback for a phrase without a recording.
 - **Every phrase the app speaks must live in `js/content.js`** (`P`, `NUMS`,
   `PRAISE`, `LETTER_NAMES`, `ANIMALS`) so it gets recorded. Build sentences from
   those parts, e.g. `say([P.nextWord, word.spoken])`. Never put spoken text directly
   in other files.
-- edge-tts is unofficial. If it stops working, switch the recorder to Microsoft
-  Azure Speech or Google Cloud Text-to-Speech, keeping the key in a GitHub secret.
+- Keys live only in GitHub secrets, never in the repository or in the app.
 
 ## Code map
 

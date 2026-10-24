@@ -38,10 +38,14 @@ jobs:
       - name: Record new phrases with the Hebrew voice
         id: voice
         continue-on-error: true
+        env:
+          # Google's Hebrew voice is used when this secret is set (Settings → Secrets and variables → Actions)
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+          GOOGLE_TTS_VOICE: ${{ vars.GOOGLE_TTS_VOICE }}
         run: |
           pip install --quiet "edge-tts>=7,<8"
           python tools/make_audio.py
-      - name: "Voice clips: ${{ steps.voice.outputs.clips || 0 }} (${{ steps.voice.outcome }})"
+      - name: "Voice clips: ${{ steps.voice.outputs.clips || 0 }} with ${{ steps.voice.outputs.voice || 'no voice' }} (${{ steps.voice.outcome }})"
         run: ls audio/*.mp3 2>/dev/null | wc -l
 
       - name: Save recorded voice clips

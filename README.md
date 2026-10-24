@@ -43,8 +43,11 @@ screen shows the current week number.
 ## The voice
 
 Every time something changes on `main`, the publish workflow records each phrase the app
-says, including every dictation word at normal and slow speed, with Microsoft's neural
-Hebrew voice (`he-IL-HilaNeural`, through [edge-tts](https://github.com/rany2/edge-tts)).
-The app plays those recordings and uses the phone's own voice only for anything missing.
-To try the male voice, set `TTS_VOICE: he-IL-AvriNeural` for the recording step in
-`.github/workflows/deploy.yml`.
+says, including every dictation word at normal and slow speed. The app plays those
+recordings and uses the phone's own voice only for anything missing.
+
+- **Google's Hebrew voice** (`he-IL-Wavenet-A`) is used when the repository secret
+  `GOOGLE_TTS_KEY` holds a Google Cloud Text-to-Speech API key. To pick another Google
+  voice, set the repository variable `GOOGLE_TTS_VOICE` (`he-IL-Wavenet-B`, `-C`, `-D`).
+- Without a key, Microsoft's neural Hebrew voice (`he-IL-HilaNeural`) is used through
+  [edge-tts](https://github.com/rany2/edge-tts).
