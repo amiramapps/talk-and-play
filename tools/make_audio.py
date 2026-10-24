@@ -3,7 +3,7 @@
 
 Writes audio/<id>.mp3 plus audio/index.json, which maps each phrase to its file
 ("slow:" + word for the slow version of a dictation word). Phrases come from
-words.txt (dictation words and sentences) and from the speech block in app.html.
+words.txt (dictation words and sentences) and from js/content.js.
 Clips that already exist are kept, so each run only records new phrases.
 
 The voice is Microsoft's neural Hebrew voice, reached through edge-tts.
@@ -27,7 +27,7 @@ def strip_niqqud(text):
 
 
 def dictation_phrases(path="words.txt"):
-    """Mirror parseWords() in app.html so the phrases match exactly."""
+    """Mirror parseWords() in js/weeks.js so the phrases match exactly."""
     phrases = []
     in_week = False
     with open(path, encoding="utf-8") as f:
@@ -53,8 +53,8 @@ def dictation_phrases(path="words.txt"):
     return phrases
 
 
-def app_phrases(path="app.html"):
-    """Evaluate the speech block of app.html with node and collect its strings."""
+def app_phrases(path="js/content.js"):
+    """Evaluate js/content.js with node and collect its strings."""
     with open(path, encoding="utf-8") as f:
         src = f.read()
     block = src.split("/* speech:start", 1)[1].split("*/", 1)[1].split("/* speech:end */", 1)[0]
