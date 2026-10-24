@@ -111,7 +111,10 @@ next clue; after the last clue, three picture choices appear.
   repository secret `GOOGLE_TTS_KEY`, `tools/tts_engines.py` tries the voices best
   first and records with the first one the key unlocks: Gemini (`gemini-2.5-pro-tts`,
   then `gemini-2.5-flash-tts`) in Google Cloud Text-to-Speech, a Gemini TTS model
-  through the Gemini API, Chirp 3 HD, then WaveNet. Without a key, or if Google
+  through the Gemini API, Chirp 3 HD, then WaveNet. The Gemini API uses the secret
+  `GEMINI_API_KEY` (a key from Google AI Studio, which needs no service account)
+  when it is set. The second working voice is a backup for phrases the first can't
+  record, e.g. over a daily limit, and the next run tries the first voice again. Without a key, or if Google
   refuses them all, it uses Microsoft's `he-IL-HilaNeural` through edge-tts. Each
   refused voice is reported as a warning in the publish run, and the "Voice clips"
   step name shows the voice used. The repository variable `GOOGLE_TTS_VOICE` forces

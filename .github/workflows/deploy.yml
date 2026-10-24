@@ -41,6 +41,8 @@ jobs:
         env:
           # Google's Hebrew voice is used when this secret is set (Settings → Secrets and variables → Actions)
           GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+          # A Gemini key from Google AI Studio, for the Gemini voice
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_TTS_VOICE: ${{ vars.GOOGLE_TTS_VOICE }}
         run: |
           pip install --quiet "edge-tts>=7,<8"

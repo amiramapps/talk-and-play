@@ -1,10 +1,12 @@
 """Text-to-speech engines for make_audio.py, best first.
 
-Each engine records one phrase as mp3 bytes. pick_engine() tries a short test phrase
-with each engine in order and returns the first one that works with the key in
-GOOGLE_TTS_KEY. Without a key, or if Google refuses every voice, Microsoft's Hila
-voice (edge-tts, no key needed) is used. GOOGLE_TTS_VOICE forces one Google Cloud
-voice by name, e.g. he-IL-Wavenet-C.
+Each engine records one phrase as mp3 bytes. pick_engines() tries a short test phrase
+with each engine in order and returns the first one that works, plus the next working
+one as a backup for phrases the first can't record (for example over a daily limit).
+Keys: GOOGLE_TTS_KEY (Google Cloud Text-to-Speech) and GEMINI_API_KEY (a Gemini key
+from Google AI Studio). Without keys, or if Google refuses every voice, Microsoft's
+Hila voice (edge-tts, no key needed) is used. GOOGLE_TTS_VOICE forces one Google
+Cloud voice by name, e.g. he-IL-Wavenet-C.
 """
 import base64
 import json
@@ -15,6 +17,7 @@ import urllib.error
 import urllib.request
 
 KEY = os.environ.get("GOOGLE_TTS_KEY", "").strip()
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "").strip() or KEY
 FORCED_VOICE = os.environ.get("GOOGLE_TTS_VOICE", "").strip()
 EDGE_VOICE = os.environ.get("TTS_VOICE", "").strip() or "he-IL-HilaNeural"
 
@@ -67,7 +70,7 @@ class GeminiAPI:
 
     def mp3(self, text, slow):
         data = _post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={KEY}",
+            f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={GEMINI_KEY}",
             {"contents": [{"parts": [{"text": STYLE[slow] + "\n\n" + text}]}],
              "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {
                  "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": self.voice}}}}})
@@ -93,28 +96,30 @@ class Edge:
 
 
 def candidates():
-    if not KEY:
-        return [Edge(EDGE_VOICE)]
-    if FORCED_VOICE:
-        return [CloudTTS(FORCED_VOICE), Edge(EDGE_VOICE)]
-    return [
-        CloudTTS("Kore", model="gemini-2.5-pro-tts"),
-        CloudTTS("Kore", model="gemini-2.5-flash-tts"),
-        GeminiAPI("Kore", model="gemini-2.5-flash-preview-tts"),
-        CloudTTS("he-IL-Chirp3-HD-Kore"),
-        CloudTTS("he-IL-Wavenet-A"),
-        Edge(EDGE_VOICE),
-    ]
+    found = []
+    if KEY and not FORCED_VOICE:
+        found += [CloudTTS("Kore", model="gemini-2.5-pro-tts"), CloudTTS("Kore", model="gemini-2.5-flash-tts")]
+    if GEMINI_KEY and not FORCED_VOICE:
+        found += [GeminiAPI("Kore", "gemini-2.5-pro-preview-tts"), GeminiAPI("Kore", "gemini-2.5-flash-preview-tts")]
+    if KEY:
+        found += [CloudTTS(FORCED_VOICE)] if FORCED_VOICE else [CloudTTS("he-IL-Chirp3-HD-Kore"), CloudTTS("he-IL-Wavenet-A")]
+    return found + [Edge(EDGE_VOICE)]
 
 
-def pick_engine():
-    """The first engine that records a test phrase; each refusal is reported as a warning."""
+def pick_engines():
+    """The first two engines that record a test phrase; each refusal is reported as a warning."""
+    working = []
     for engine in candidates():
         try:
             if len(engine.mp3("שָׁלוֹם, בּוֹאוּ נְשַׂחֵק.", False)) > 1000:
-                return engine
+                working.append(engine)
+                if len(working) == 2:
+                    break
+                continue
             raise RuntimeError("the recording came back empty")
         except Exception as e:
             reason = " ".join(str(e).split())  # one line: a warning ends at the first line break
             print(f"::warning::Voice {engine.label} is not available: {reason[:600]}")
-    raise SystemExit("No voice could record anything.")
+    if not working:
+        raise SystemExit("No voice could record anything.")
+    return working[0], (working[1] if len(working) > 1 else None)

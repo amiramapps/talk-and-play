@@ -19,7 +19,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from tts_engines import pick_engine  # noqa: E402
+from tts_engines import pick_engines  # noqa: E402
 
 OUT = "audio"
 
@@ -70,29 +70,37 @@ def app_phrases(path="js/content.js"):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    engine = pick_engine()
-    jobs = {}
-    for text, slow, key in app_phrases() + dictation_phrases():
-        name = hashlib.sha1(f"{engine.label}|{slow}|{text}".encode()).hexdigest()[:16] + ".mp3"
-        jobs[key] = (text, slow, name)
+    engine, backup = pick_engines()
+    clip_name = lambda eng, slow, text: hashlib.sha1(f"{eng.label}|{slow}|{text}".encode()).hexdigest()[:16] + ".mp3"
+    jobs = {key: (text, slow) for text, slow, key in app_phrases() + dictation_phrases()}
 
-    def one(item):
-        key, (text, slow, name) = item
+    def record(eng, text, slow, tries):
+        """The clip's file name, recording it first if needed; (None, reason) if it failed."""
+        name = clip_name(eng, slow, text)
         path = os.path.join(OUT, name)
         if os.path.exists(path) and os.path.getsize(path) > 0:
-            return key, name, None, False
+            return name, None
         err = "empty recording"
-        for attempt in range(4):
+        for attempt in range(tries):
             try:
-                data = engine.mp3(text, slow)
+                data = eng.mp3(text, slow)
                 if data:
                     with open(path, "wb") as f:
                         f.write(data)
-                    return key, name, None, True
+                    return name, None
             except Exception as e:  # network hiccups and rate limits: wait and retry
                 err = " ".join(str(e).split())[:200]
             time.sleep(3 * 2 ** attempt)
-        return key, None, err, False
+        return None, err
+
+    def one(item):
+        # Each run tries the best voice again; the backup voice covers what it couldn't record
+        key, (text, slow) = item
+        existed = os.path.exists(os.path.join(OUT, clip_name(engine, slow, text)))
+        name, err = record(engine, text, slow, 4)
+        if not name and backup:
+            name, err = record(backup, text, slow, 3)
+        return key, name, err, bool(name) and not existed
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         results = list(pool.map(one, jobs.items()))
@@ -107,6 +115,9 @@ def main():
             os.remove(os.path.join(OUT, f))
     with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
         json.dump({**index, "__voice": engine.label}, f, ensure_ascii=False, indent=0, sort_keys=True)
+    by_backup = sum(1 for name in index.values() if backup and name in {clip_name(backup, sl, t) for t, sl in jobs.values()})
+    if by_backup:
+        print(f"::warning::{by_backup} phrases were recorded with the backup voice {backup.label}; the next run tries {engine.label} again.")
 
     print(f"{len(index)} of {len(jobs)} phrases have a clip ({made} recorded now, voice {engine.label}).")
     if os.environ.get("GITHUB_OUTPUT"):
