@@ -100,7 +100,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 /* Dictation */
 .facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
 .progress { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--display); font-weight: 600; }
-.progress .num { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.progress .num { font-size: 1.4rem; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
 .bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--sun); border-radius: inherit; transition: width .3s; }
 /* The ring around the speaker empties as the word's 15 seconds run out */
@@ -156,21 +156,31 @@ main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: 
 .result { font-weight: 700; }
 .result.yes { color: var(--sea); } .result.no { color: var(--berry); }
 
-/* Animal game */
+/* Animal games */
 .mystery {
-  align-self: center; width: 150px; height: 150px; border-radius: 50%;
+  align-self: center; width: 130px; height: 130px; border-radius: 50%;
   background: var(--paper); border: 4px dashed var(--sun);
-  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 5rem; line-height: 1;
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 4.4rem; line-height: 1;
 }
 .mystery.found { border-style: solid; border-color: var(--sea); animation: pop .6s ease; }
-.clue { font-size: 1.3rem; text-align: center; margin: 0; text-wrap: balance; }
-.dots { display: flex; justify-content: center; gap: 8px; }
-.dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
-.dots i.on { background: var(--sun); }
 .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.choice { border: 2px solid var(--line); background: var(--paper); border-radius: 18px; padding: 10px 4px;
-  display: grid; gap: 2px; justify-items: center; font-family: var(--display); font-weight: 600; }
-.choice .e { font-size: 2.4rem; line-height: 1.1; }
+.animal-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.animal-grid.small .e { font-size: 1.8rem; }
+.choice { border: 2px solid var(--line); background: var(--paper); border-radius: 18px; padding: 8px 2px;
+  display: grid; gap: 2px; justify-items: center; font-family: var(--display); font-weight: 600; font-size: .9rem; }
+.choice .e { font-size: 2.2rem; line-height: 1.1; }
+.qlog { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; max-height: 32vh; overflow-y: auto; }
+.qlog li { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 6px 12px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); }
+.qlog li span { min-width: 0; }
+.qlog b { font-family: var(--display); white-space: nowrap; }
+.qlog .a-yes { color: var(--sea); } .qlog .a-no { color: var(--berry); } .qlog .a-some { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { border: 2px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 12px; font-size: .9rem; }
+.question { font-family: var(--display); font-weight: 700; font-size: 1.6rem; text-align: center; margin: 6px 0; text-wrap: balance; line-height: 1.25; }
+.yesno .btn { min-height: 64px; font-size: 1.4rem; }
+.btn.yes { background: var(--sea); border-color: var(--sea); color: var(--on-accent); }
+.btn.no { background: var(--berry); border-color: var(--berry); color: var(--on-accent); }
 
 /* Mic */
 .dock { display: flex; flex-direction: column; align-items: center; gap: 6px; }

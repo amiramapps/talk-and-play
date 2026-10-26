@@ -62,8 +62,16 @@ everything must still work by tapping.
 ### Choosing the 15 words
 
 Every dictation and spelling round has **15 words**: the **10 words of the current
-week** plus **5 review words picked at random from previous weeks**. Words the child
-got wrong before are preferred as review words. The 15 are shuffled.
+week** plus **5 review words from previous weeks**. The 15 are shuffled.
+
+**The owner wants mistakes practiced more and well-known words less.** `js/practice.js`
+keeps each word in a box from 0 to 5 on the phone: a mistake (✗ in the dictation
+check, or a missed spelling) sends it to box 0, a right answer moves it up one box,
+and right-on-the-second-try in spelling keeps its box. Review words are drawn at
+random weighted by box (16, 8, 4, 2, 1, 0.5 from box 0 to 5; words not practiced yet
+start in box 2). In practice a weak word is in about 90% of dictations and a
+well-known one in about 7%. The parents' line on the home screen lists the words
+that need practice ("מילים לחיזוק").
 
 ### הכתבה (dictation)
 
@@ -97,10 +105,26 @@ got wrong before are preferred as review words. The 15 are shuffled.
 - When the mic gets letter names wrong on real phones, add the spellings it
   produces to `NAME_TO_LETTER` in `js/spelling.js`.
 
-### מנחשים חיות (guess the animal)
+### מנחשים חיות (animal games, like Akinator)
 
-The animal describes itself in clues ("אני עושה: מוּוּוּ!"). A wrong guess gets the
-next clue; after the last clue, three picture choices appear.
+The tile opens a choice between two yes/no games, up to **20 questions** each, with
+36 animals. Each animal has traits (`ANIMALS[].has` in `js/content.js`, "?" means
+"sometimes"), and each trait has a spoken question and the words a child might use
+(`TRAITS`).
+
+- **שואלים את האפליקציה** (`js/animal-ask.js`): the app picks an animal and answers
+  only "כן", "לא" or "לפעמים". The child's question is matched to a trait by its words
+  (the longest matching word wins); naming an animal is a guess and counts as a
+  question. A question it can't match is not counted, and the list of questions
+  opens for tapping. Guesses can also be tapped from the animal pictures.
+- **האפליקציה מנחשת** (`js/animal-guess.js`): the child picks an animal from the
+  pictures, and the app asks the question that best splits the animals still
+  possible, then guesses. A wrong answer doesn't end the game, since animals are
+  ranked by how many answers they don't fit. The child answers by voice or with
+  כן / לא / לא יודעים buttons. If the app fails, it asks which animal it was.
+- In tests the app finds all 36 animals, in 6.5 questions on average, and in at
+  most 14 when the child gives one wrong answer. After changing the traits, re-run
+  that check: every animal must still be found within 20 questions.
 
 ## The voice
 
@@ -140,7 +164,7 @@ next clue; after the last clue, three picture choices appear.
   של הטלפון").
 - The phone's own Hebrew voice is only a fallback for a phrase without a recording.
 - **Every phrase the app speaks must live in `js/content.js`** (`P`, `NUMS`,
-  `PRAISE`, `LETTER_NAMES`, `ANIMALS`) so it gets recorded. Build sentences from
+  `PRAISE`, `LETTER_NAMES`, `ANIMALS`, `TRAITS`) so it gets recorded. Build sentences from
   those parts, e.g. `say([P.nextWord, word.spoken])`. Never put spoken text directly
   in other files.
 - Keys live only in GitHub secrets, never in the repository or in the app.
@@ -157,7 +181,10 @@ next clue; after the last clue, three picture choices appear.
 | `js/weeks.js` | Reading `words.txt`, week numbers, opening a dictation |
 | `js/dictation.js` | Dictation timing and checking |
 | `js/spelling.js` | Spelling by letter names, letter pad |
-| `js/animals.js` | Guess the animal |
+| `js/practice.js` | Which words the child knows, and picking review words |
+| `js/animals.js` | Animal games: choosing a game, shared helpers |
+| `js/animal-ask.js` | The child asks, the app answers yes or no |
+| `js/animal-guess.js` | The app asks, the child answers yes or no |
 | `tools/make_audio.py` | Records the voice clips (runs in the publish workflow) |
 | `tools/tts_engines.py` | The voices it can record with, best first |
 | `tools/check_audio.py` | Gemini listens to each word and checks its pronunciation |
@@ -168,6 +195,6 @@ call things defined in files loaded before it.
 
 ## Progress kept on each phone
 
-Stars, the dictation or spelling round in progress, and the list of words the
-child got wrong are saved in the phone's browser storage. They are per phone and
+Stars, the dictation or spelling round in progress, and how well the child knows
+each word are saved in the phone's browser storage. They are per phone and
 are never sent anywhere.

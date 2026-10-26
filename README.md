@@ -6,10 +6,11 @@ A talking game for kids in Hebrew, played on a phone:
   then you check them together in the app.
 - **Spelling (איות)**: the app says a week word and the child spells it out loud by letter
   name ("דלת, גימל"), or taps the letters on screen.
-- **Guess the animal**: listen to clues and say (or tap) the answer.
+- **Animal games**: like Akinator, with yes/no questions. Either the child asks up to 20
+  questions to find the app's animal, or the app asks to find the child's animal.
 
 Kids tap the red mic and speak Hebrew: "הכתבה", "איות", "חיות", "שוב", "לאט",
-"הבאה", "רמז" or "הביתה".
+"הבאה", "כן", "לא" or "הביתה".
 
 ## Changing the app
 

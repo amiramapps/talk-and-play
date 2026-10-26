@@ -61,11 +61,11 @@ def app_phrases(path="js/content.js"):
     with open(path, encoding="utf-8") as f:
         src = f.read()
     block = src.split("/* speech:start", 1)[1].split("*/", 1)[1].split("/* speech:end */", 1)[0]
-    js = block + "\nconsole.log(JSON.stringify({ P, NUMS, PRAISE, ANIMALS, LETTER_NAMES }));"
+    js = block + "\nconsole.log(JSON.stringify({ P, NUMS, PRAISE, ANIMALS, LETTER_NAMES, TRAITS }));"
     data = json.loads(subprocess.run(["node", "-e", js], capture_output=True, text=True, check=True).stdout)
     texts = list(data["P"].values()) + data["NUMS"] + data["PRAISE"] + list(data["LETTER_NAMES"].values())
-    for animal in data["ANIMALS"]:
-        texts += [animal["name"], *animal["clues"]]
+    texts += [animal["name"] for animal in data["ANIMALS"]]
+    texts += [trait["ask"] for trait in data["TRAITS"].values()]
     return [(t.strip(), False, t.strip()) for t in texts if t.strip()]
 
 

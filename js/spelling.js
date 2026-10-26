@@ -185,9 +185,7 @@ function spellNext() {
 
 function finishSpelling() {
   spell.stage = "done"; save("tp-spell", spell);
-  const missed = new Set(load("tp-missed", []));
-  spell.words.forEach((w, i) => { if (spell.marks[i] === "ok") missed.delete(w.written); else if (spell.marks[i] === "miss") missed.add(w.written); });
-  save("tp-missed", [...missed]);
+  spell.words.forEach((w, i) => recordResult(w.written, { ok: "right", ok2: "almost" }[spell.marks[i]] || "wrong"));
   show("spellDone");
   const list = $("spellResults"); list.innerHTML = "";
   let right = 0;
@@ -222,7 +220,7 @@ function handleSpell(alts) {
   if (saysPhrase(alts, AGAIN)) return promptWord();
   if (saysPhrase(alts, NEXT)) return spellNext();
   if (saysPhrase(alts, ["סיימתי", "בדיקה", "תבדוק", "תבדקי"]) && attempt.length) return checkAttempt();
-  if (saysPhrase(alts, WANT_GUESS)) return startGuess();
+  if (saysPhrase(alts, WANT_GUESS)) return openAnimalMenu();
   if (saysPhrase(alts, ["הכתבה"])) return openDictation();
   setFb("spellFb", "אומרים את שמות האותיות, למשל ״דלת, גימל״", "try");
   say(P.sayLettersHint).then(done => { if (done) autoListen(); });

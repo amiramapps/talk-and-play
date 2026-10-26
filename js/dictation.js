@@ -134,9 +134,7 @@ $("finishCheckBtn").onclick = () => {
   if (dict.stage === "done") return;
   const right = dict.words.filter((_, i) => dict.marks[i] === true).length;
   // Remember mistakes so they come back as review words in the next weeks
-  const missed = new Set(load("tp-missed", []));
-  dict.words.forEach((w, i) => { if (dict.marks[i] === false) missed.add(w.written); else missed.delete(w.written); });
-  save("tp-missed", [...missed]);
+  dict.words.forEach((w, i) => recordResult(w.written, dict.marks[i] === false ? "wrong" : "right"));
   dict.stage = "done"; save("tp-dict", dict);
   addStars(right);
   $("finishCheckBtn").disabled = true;

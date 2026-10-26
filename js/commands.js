@@ -15,9 +15,13 @@ const START = ["מתחילים","להתחיל","מוכן","מוכנה","מוכנ
 function handle(alts) {
   if (saysPhrase(alts, HOME)) { goHome(); return; }
   if (current === "spellWord") return handleSpell(alts);
+  // In the animal games everything said is a question or an answer, so it goes to the game first
+  if (current === "askGame") return handleAsk(alts);
+  if (current === "guessGame") return handleAppGuess(alts);
+  if (current === "animalMenu") return handleAnimalMenu(alts);
   if (!current.startsWith("spell") && saysPhrase(alts, WANT_SPELL)) { openSpelling(); return; }
   if (!current.startsWith("dict") && saysPhrase(alts, WANT_DICT)) { openDictation(); return; }
-  if (current !== "guess" && saysPhrase(alts, WANT_GUESS)) { startGuess(); return; }
+  if (saysPhrase(alts, WANT_GUESS)) { openAnimalMenu(); return; }
   if (current === "dictIntro") {
     if (saysPhrase(alts, START)) return startDictation(false);
     return say(P.sayStart);
@@ -36,16 +40,17 @@ function handle(alts) {
     if (saysPhrase(alts, START)) return startSpelling(false);
     return say(P.spellSayStart);
   }
-  if (current === "guess") return handleGuess(alts);
   say(P.canSayGames);
 }
 
 // ---------- Screens ----------
-const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "spellIntro", "spellWord", "spellDone", "guess"];
+const SCREENS = ["home", "dictIntro", "dictWord", "dictCheck", "spellIntro", "spellWord", "spellDone",
+  "animalMenu", "askGame", "guessGame"];
 function show(id) {
+  if (id !== current && listening && rec) rec.abort();
   current = id;
   if (id !== "dictWord") { stopTimer(); letScreenSleep(); }
-  if (id !== "spellWord") { clearTimeout(advanceTimer); if (listening && rec) rec.abort(); }
+  if (id !== "spellWord") clearTimeout(advanceTimer);
   for (const s of SCREENS) $(s).hidden = s !== id;
   document.querySelector("main").scrollTop = 0;
 }
@@ -57,4 +62,4 @@ function goHome() {
 $("homeBtn").onclick = goHome;
 $("goDict").onclick = () => openDictation();
 $("goSpell").onclick = () => openSpelling();
-$("goGuess").onclick = () => startGuess();
+$("goGuess").onclick = () => openAnimalMenu();

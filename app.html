@@ -38,7 +38,7 @@
         <li><b>״רמז״</b> לשמוע עוד רמז על החיה</li>
         <li><b>״הביתה״</b> לחזור לכאן</li>
       </ul>
-      <p class="parents">להורים: השבוע הוא <b id="weekNow">שבוע</b> בשנה. <a href="https://github.com/amiramapps/talk-and-play/edit/main/words.txt" target="_blank" rel="noopener">מוסיפים את המילים של השבוע</a> בקובץ words.txt. <span id="voiceInfo"></span></p>
+      <p class="parents">להורים: השבוע הוא <b id="weekNow">שבוע</b> בשנה. <a href="https://github.com/amiramapps/talk-and-play/edit/main/words.txt" target="_blank" rel="noopener">מוסיפים את המילים של השבוע</a> בקובץ words.txt. <span id="voiceInfo"></span> <span id="weakWords"></span></p>
     </section>
 
     <!-- Dictation: get ready -->
@@ -131,18 +131,62 @@
       </div>
     </section>
 
-    <!-- Animals -->
-    <section class="screen" id="guess" hidden>
+    <!-- Animals: choose a game -->
+    <section class="screen" id="animalMenu" hidden>
+      <p class="hello">איך נשחק?</p>
+      <div class="tiles">
+        <button class="tile guess" id="goAsk">
+          <span class="pic">🙋</span>
+          <span><strong>שואלים את האפליקציה</strong><span>האפליקציה חושבת על חיה, ומגלים אותה בעשרים שאלות</span></span>
+        </button>
+        <button class="tile write" id="goAppGuess">
+          <span class="pic">🤔</span>
+          <span><strong>האפליקציה מנחשת</strong><span>חושבים על חיה, והאפליקציה מנסה לגלות אותה</span></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Animals: the child asks yes/no questions -->
+    <section class="screen" id="askGame" hidden>
       <div class="card">
-        <div class="mystery" id="mystery">?</div>
-        <div class="dots" id="dots"></div>
-        <p class="clue" id="clue"></p>
-        <p class="feedback" id="guessFb"></p>
-        <div class="choices" id="choices" hidden></div>
+        <div class="progress"><span>שאלה</span><span class="num" id="askNum">0 / 20</span></div>
+        <div class="bar"><i id="askBar" style="width:0%"></i></div>
+        <div class="mystery" id="askMystery">?</div>
+        <p class="feedback" id="askFb"></p>
+        <ol class="qlog" id="askLog" aria-live="polite"></ol>
         <div class="row">
-          <button class="btn" id="hearBtn">🔊 שוב</button>
-          <button class="btn" id="hintBtn">💡 רמז</button>
-          <button class="btn main" id="nextAnimalBtn">חיה חדשה ←</button>
+          <button class="btn" id="askListBtn">📋 שאלות</button>
+          <button class="btn" id="askGuessBtn">🦁 ניחוש</button>
+          <button class="btn" id="askGiveUpBtn">🏳️ מוותרים</button>
+        </div>
+        <div class="chips" id="askChips" hidden></div>
+        <div class="choices animal-grid" id="askGrid" hidden></div>
+        <div class="row"><button class="btn main" id="askNewBtn">משחק חדש ←</button></div>
+      </div>
+    </section>
+
+    <!-- Animals: the app asks, the child answers yes or no -->
+    <section class="screen" id="guessGame" hidden>
+      <div class="card">
+        <div id="guessStart">
+          <p class="sub">חושבים על אחת מהחיות האלה, ולא מגלים!</p>
+          <div class="choices animal-grid small" id="guessKnown"></div>
+          <div class="row"><button class="btn main" id="guessStartBtn">מתחילים!</button></div>
+        </div>
+        <div id="guessPlay" hidden>
+          <div class="progress"><span>שאלה</span><span class="num" id="guessNum">1 / 20</span></div>
+          <div class="bar"><i id="guessBar" style="width:0%"></i></div>
+          <p class="question" id="guessQuestion"></p>
+          <div class="row yesno">
+            <button class="btn yes" id="ansYes">✓ כן</button>
+            <button class="btn no" id="ansNo">✗ לא</button>
+          </div>
+          <div class="row"><button class="btn" id="ansSkip">🤷 לא יודעים</button></div>
+        </div>
+        <div id="guessEnd" hidden>
+          <p class="question" id="guessResult"></p>
+          <div class="choices animal-grid small" id="guessReveal" hidden></div>
+          <div class="row"><button class="btn main" id="guessNewBtn">משחק חדש ←</button></div>
         </div>
       </div>
     </section>
@@ -159,8 +203,11 @@
 
 <script src="js/content.js"></script>
 <script src="js/core.js"></script>
+<script src="js/practice.js"></script>
 <script src="js/commands.js"></script>
 <script src="js/weeks.js"></script>
 <script src="js/dictation.js"></script>
 <script src="js/spelling.js"></script>
 <script src="js/animals.js"></script>
+<script src="js/animal-ask.js"></script>
+<script src="js/animal-guess.js"></script>

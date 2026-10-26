@@ -65,7 +65,7 @@ async function loadWeeks() {
 const weeksReady = loadWeeks();
 
 // Build the dictation: all of the week's words plus review words from earlier weeks,
-// taking words the child got wrong before first.
+// picked so that words the child finds hard come back much more often (js/practice.js).
 function reviewPool(wk) {
   const seen = new Set(wk.words.map(w => w.written));
   const older = [];
@@ -77,8 +77,7 @@ function reviewPool(wk) {
 function buildDictation(wk) {
   const fresh = wk.words.map(w => ({ ...w, review: false }));
   const older = reviewPool(wk);
-  const missed = new Set(load("tp-missed", []));
-  const review = [...shuffle(older.filter(w => missed.has(w.written))), ...shuffle(older.filter(w => !missed.has(w.written)))].slice(0, REVIEW_COUNT);
+  const review = pickWeighted(older, REVIEW_COUNT);
   return { key: buildKey(wk), label: wk.label, words: shuffle([...fresh, ...review]), at: 0, marks: {}, stage: "words" };
 }
 const buildKey = wk => wk.label + "|" + wk.words.map(w => w.written).join(",");

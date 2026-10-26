@@ -156,7 +156,6 @@ function markNoVoice(msg) {
   voiceBlocked = true;
   mic.classList.add("off");
   setStatus(msg);
-  if (current === "guess") showChoices();
 }
 
 function listen() {
