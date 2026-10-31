@@ -18,7 +18,7 @@ const FROM_FINAL = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" 
 // Final letters count as their regular form when checking, since "מם" and "מם סופית" sound alike to the mic
 const baseLetters = s => [...s].map(c => FROM_FINAL[c] || c).join("");
 const isLetter = c => /^[א-ת]$/.test(c);
-const targetOf = w => [...w.written.replace(/\s+/g, "")];
+const targetOf = w => [...w.written.replace(/[^\u05D0-\u05EA]/g, "")]; // letters only: no spaces or the " of סכו"ם
 
 function parseLetters(text) {
   const out = [];

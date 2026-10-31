@@ -95,6 +95,8 @@ that need practice ("מילים לחיזוק").
 - The same 15 words. The app says "איך מאייתים: …" and listens by itself.
 - The child says the letter **names** ("דלת, גימל"). Each recognized letter fills
   a box, and spelling may come in several breaths.
+- Only letters are spelled: spaces and the gershayim of an abbreviation
+  (סכו"ם) get no box.
 - Right: a ⭐ and the next word. Wrong: the wrong letters are marked and the child
   tries once more. After the second miss, the app spells the word letter by
   letter and moves on.
